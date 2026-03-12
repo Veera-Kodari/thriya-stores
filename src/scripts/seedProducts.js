@@ -1,152 +1,918 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
-
 const Product = require('../models/Product');
 
-const products = [
-    // =============================================================
-    //  WOMEN'S — SAREES
-    // =============================================================
-    { name: 'Banarasi Silk Saree', description: 'Exquisite handwoven Banarasi silk saree with intricate gold zari work. Rich pallu with traditional motifs. Perfect for weddings and festivals.', price: 8999, originalPrice: 12999, category: 'women', subcategory: 'sarees', brand: 'Kanchivaram Silks', image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400', rating: 4.8, reviewCount: 856, sizes: ['Free Size'], colors: ['Red & Gold', 'Maroon & Gold', 'Royal Blue'], inStock: true, featured: true, tags: ['banarasi', 'silk', 'wedding', 'zari', 'handwoven'] },
-    { name: 'Kanjivaram Pure Silk Saree', description: 'Authentic Kanjivaram saree from Tamil Nadu. Pure mulberry silk with contrast border and grand pallu. Temple jewellery inspired motifs.', price: 15999, originalPrice: 21999, category: 'women', subcategory: 'sarees', brand: 'Kanchivaram Silks', image: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400', rating: 4.9, reviewCount: 1234, sizes: ['Free Size'], colors: ['Purple & Gold', 'Green & Maroon', 'Red & Green'], inStock: true, featured: true, tags: ['kanjivaram', 'silk', 'bridal', 'traditional', 'temple'] },
-    { name: 'Chanderi Cotton Saree', description: 'Lightweight Chanderi cotton saree with delicate butis. Sheer texture with golden border. Ideal for summer and daily puja wear.', price: 2499, originalPrice: 3499, category: 'women', subcategory: 'sarees', brand: 'Fabindia', image: 'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400', rating: 4.4, reviewCount: 567, sizes: ['Free Size'], colors: ['Yellow', 'Peach', 'Mint Green'], inStock: true, featured: false, tags: ['chanderi', 'cotton', 'lightweight', 'daily-wear'] },
-    { name: 'Pochampally Ikat Saree', description: 'Handloom Pochampally Ikat saree with geometric patterns. Double ikat weave from Telangana. GI tagged authentic craft.', price: 4599, originalPrice: null, category: 'women', subcategory: 'sarees', brand: 'Handloom House', image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400', rating: 4.5, reviewCount: 389, sizes: ['Free Size'], colors: ['Red & White', 'Blue & White', 'Green & Yellow'], inStock: true, featured: false, tags: ['pochampally', 'ikat', 'handloom', 'telangana'] },
-    { name: 'Mysore Crepe Silk Saree', description: 'Elegant Mysore crepe silk saree with minimal design. Lightweight and easy to drape. Perfect for office and casual occasions.', price: 3999, originalPrice: 5499, category: 'women', subcategory: 'sarees', brand: 'Mysore Silks', image: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400', rating: 4.3, reviewCount: 445, sizes: ['Free Size'], colors: ['Navy Blue', 'Wine', 'Teal'], inStock: true, featured: false, tags: ['mysore', 'crepe', 'silk', 'office-wear'] },
-    { name: 'Paithani Silk Saree', description: 'Maharashtra special Paithani saree with peacock pallu. Handwoven with real zari. Heirloom quality bridal saree.', price: 24999, originalPrice: 34999, category: 'women', subcategory: 'sarees', brand: 'Kanchivaram Silks', image: 'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400', rating: 4.9, reviewCount: 234, sizes: ['Free Size'], colors: ['Green & Red', 'Purple & Gold'], inStock: true, featured: true, tags: ['paithani', 'bridal', 'heirloom', 'maharashtra'] },
+// ===============================================================
+//  RELIABLE IMAGE POOLS (verified working Unsplash photo IDs)
+// ===============================================================
+const IMG = {
+  saree: [
+    'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1609748340878-aec2e10e3c41?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1585487000160-6ebcfceb0d44?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=520&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400&h=520&fit=crop&q=80',
+  ],
+  lehenga: [
+    'https://images.unsplash.com/photo-1594463750939-ebb28c3f7f75?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1585487000160-6ebcfceb0d44?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1594463750939-ebb28c3f7f75?w=400&h=520&fit=crop&q=80',
+  ],
+  salwar: [
+    'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1609748340878-aec2e10e3c41?w=400&h=520&fit=crop',
+  ],
+  kurti: [
+    'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1609748340878-aec2e10e3c41?w=400&h=520&fit=crop',
+  ],
+  dupatta: [
+    'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=520&fit=crop',
+  ],
+  blouse: [
+    'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400&h=520&fit=crop',
+  ],
+  jewellery: [
+    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1515562141589-67f0d724768b?w=400&h=520&fit=crop',
+  ],
+  kurta: [
+    'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=520&fit=crop&q=80',
+  ],
+  sherwani: [
+    'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&h=520&fit=crop&q=80',
+  ],
+  shirt: [
+    'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1598033129183-c4f50c736c10?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1621072156002-e2fccdc0b176?w=400&h=520&fit=crop',
+  ],
+  pants: [
+    'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=400&h=520&fit=crop',
+  ],
+  jeans: [
+    'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1604176354204-9268737828e4?w=400&h=520&fit=crop',
+  ],
+  lungi: [
+    'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=520&fit=crop',
+  ],
+  footwear: [
+    'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=520&fit=crop',
+  ],
+  accessories: [
+    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=520&fit=crop',
+  ],
+  kids: [
+    'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=400&h=520&fit=crop',
+  ],
+  tshirt: [
+    'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400&h=520&fit=crop',
+  ],
+  blazer: [
+    'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&h=520&fit=crop',
+    'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=400&h=520&fit=crop',
+  ],
+};
 
-    // =============================================================
-    //  WOMEN'S — LEHENGAS
-    // =============================================================
-    { name: 'Bridal Lehenga Choli Set', description: 'Stunning bridal lehenga in heavy raw silk with intricate embroidery, sequin and stone work. Includes matching choli and net dupatta.', price: 18999, originalPrice: 29999, category: 'women', subcategory: 'lehengas', brand: 'Sabyasachi Style', image: 'https://images.unsplash.com/photo-1594463750939-ebb28c3f7f75?w=400', rating: 4.7, reviewCount: 678, sizes: ['S', 'M', 'L', 'XL'], colors: ['Red', 'Maroon', 'Pink'], inStock: true, featured: true, tags: ['bridal', 'lehenga', 'wedding', 'embroidery'] },
-    { name: 'Designer Mirror Work Lehenga', description: 'Rajasthani mirror work lehenga with vibrant colours. Ghagra style with flared silhouette. Festival special.', price: 7999, originalPrice: 11999, category: 'women', subcategory: 'lehengas', brand: 'Rajwada Fashion', image: 'https://images.unsplash.com/photo-1594463750939-ebb28c3f7f75?w=400', rating: 4.5, reviewCount: 345, sizes: ['S', 'M', 'L', 'XL', 'XXL'], colors: ['Orange', 'Blue', 'Green'], inStock: true, featured: false, tags: ['mirror-work', 'rajasthani', 'festival', 'ghagra'] },
-    { name: 'Pastel Party Wear Lehenga', description: 'Elegant pastel lehenga with thread embroidery and sequin highlights. Modern cut with crop top style blouse.', price: 5999, originalPrice: null, category: 'women', subcategory: 'lehengas', brand: 'Meena Bazaar', image: 'https://images.unsplash.com/photo-1594463750939-ebb28c3f7f75?w=400', rating: 4.3, reviewCount: 267, sizes: ['XS', 'S', 'M', 'L'], colors: ['Lavender', 'Mint', 'Peach'], inStock: true, featured: false, tags: ['pastel', 'party-wear', 'modern', 'crop-top'] },
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function randBetween(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randRating() { return +(3.5 + Math.random() * 1.5).toFixed(1); }
+function randReviews() { return randBetween(15, 3500); }
+function maybeOrigPrice(price) { return Math.random() > 0.35 ? Math.round(price * (1.3 + Math.random() * 0.5)) : null; }
 
-    // =============================================================
-    //  WOMEN'S — SALWAR SUITS
-    // =============================================================
-    { name: 'Anarkali Suit with Dupatta', description: 'Floor-length Anarkali suit in georgette with heavy gota patti work. Comes with churidar and matching dupatta.', price: 4999, originalPrice: 6999, category: 'women', subcategory: 'salwar-suits', brand: 'Meena Bazaar', image: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400', rating: 4.6, reviewCount: 534, sizes: ['S', 'M', 'L', 'XL', 'XXL'], colors: ['Wine', 'Teal', 'Mustard'], inStock: true, featured: true, tags: ['anarkali', 'gota-patti', 'festive'] },
-    { name: 'Patiala Salwar Suit Set', description: 'Punjabi style Patiala suit with printed kurta and contrast Patiala salwar. Comfortable cotton blend.', price: 1999, originalPrice: 2999, category: 'women', subcategory: 'salwar-suits', brand: 'Fabindia', image: 'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400', rating: 4.2, reviewCount: 445, sizes: ['S', 'M', 'L', 'XL'], colors: ['Yellow & Blue', 'Pink & Green', 'Red & Black'], inStock: true, featured: false, tags: ['patiala', 'punjabi', 'cotton', 'daily-wear'] },
-    { name: 'Palazzo Suit Set', description: 'Trendy palazzo suit with embroidered kurta and wide-leg palazzo. Includes chiffon dupatta with lace border.', price: 2799, originalPrice: null, category: 'women', subcategory: 'salwar-suits', brand: 'W for Woman', image: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400', rating: 4.4, reviewCount: 378, sizes: ['S', 'M', 'L', 'XL'], colors: ['White & Gold', 'Navy & Silver', 'Black & Red'], inStock: true, featured: false, tags: ['palazzo', 'trendy', 'chiffon', 'lace'] },
-
-    // =============================================================
-    //  WOMEN'S — KURTIS
-    // =============================================================
-    { name: 'Chikankari Cotton Kurti', description: 'Lucknowi Chikankari hand-embroidered kurti in soft cotton. Delicate floral patterns with scalloped hem.', price: 1499, originalPrice: 2199, category: 'women', subcategory: 'kurtis', brand: 'Fabindia', image: 'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400', rating: 4.5, reviewCount: 789, sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], colors: ['White', 'Peach', 'Sky Blue'], inStock: true, featured: true, tags: ['chikankari', 'lucknowi', 'cotton', 'embroidered'] },
-    { name: 'Straight Cut Rayon Kurti', description: 'Comfortable straight-cut kurti in premium rayon. Block print design with mandarin collar. Perfect for office wear.', price: 899, originalPrice: null, category: 'women', subcategory: 'kurtis', brand: 'W for Woman', image: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400', rating: 4.1, reviewCount: 1234, sizes: ['S', 'M', 'L', 'XL', 'XXL'], colors: ['Mustard', 'Olive', 'Maroon'], inStock: true, featured: false, tags: ['rayon', 'office-wear', 'block-print', 'daily'] },
-    { name: 'Designer Anarkali Kurti', description: 'Flared Anarkali style kurti with gold prints and tassel details. Festive wear in premium georgette fabric.', price: 1999, originalPrice: 2799, category: 'women', subcategory: 'kurtis', brand: 'Biba', image: 'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400', rating: 4.4, reviewCount: 456, sizes: ['S', 'M', 'L', 'XL'], colors: ['Red', 'Navy', 'Emerald Green'], inStock: true, featured: false, tags: ['anarkali', 'festive', 'georgette', 'designer'] },
-
-    // =============================================================
-    //  WOMEN'S — DUPATTAS & BLOUSES
-    // =============================================================
-    { name: 'Bandhani Silk Dupatta', description: 'Traditional Rajasthani Bandhani dupatta in pure silk. Vibrant tie-dye pattern with golden border.', price: 1299, originalPrice: 1899, category: 'women', subcategory: 'dupattas', brand: 'Rajwada Fashion', image: 'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400', rating: 4.3, reviewCount: 234, sizes: ['Free Size'], colors: ['Red & Yellow', 'Green & Orange', 'Pink & Purple'], inStock: true, featured: false, tags: ['bandhani', 'rajasthani', 'silk', 'traditional'] },
-    { name: 'Embroidered Readymade Blouse', description: 'Designer readymade blouse with zardozi embroidery. Padded with back hooks. Pairs perfectly with silk sarees.', price: 1599, originalPrice: null, category: 'women', subcategory: 'blouses', brand: 'Kanchivaram Silks', image: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400', rating: 4.2, reviewCount: 345, sizes: ['32', '34', '36', '38', '40'], colors: ['Gold', 'Red', 'Green', 'Black'], inStock: true, featured: false, tags: ['blouse', 'zardozi', 'readymade', 'designer'] },
-
-    // =============================================================
-    //  WOMEN'S — JEWELLERY
-    // =============================================================
-    { name: 'Temple Jewellery Set', description: 'South Indian temple jewellery set with necklace, earrings and tikka. Gold-plated with ruby and emerald stones.', price: 2999, originalPrice: 4499, category: 'women', subcategory: 'jewellery', brand: 'Tanishq Style', image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400', rating: 4.6, reviewCount: 567, sizes: [], colors: ['Gold & Ruby', 'Gold & Emerald'], inStock: true, featured: true, tags: ['temple', 'jewellery', 'south-indian', 'gold-plated'] },
-    { name: 'Kundan Choker Necklace', description: 'Royal Kundan choker with meenakari work on reverse. Bridal jewellery with matching jhumka earrings.', price: 3499, originalPrice: null, category: 'women', subcategory: 'jewellery', brand: 'Tanishq Style', image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400', rating: 4.7, reviewCount: 389, sizes: [], colors: ['Gold & Polki', 'Gold & Pearl'], inStock: true, featured: false, tags: ['kundan', 'choker', 'bridal', 'meenakari'] },
-    { name: 'Oxidised Silver Jhumka Set', description: 'Trendy oxidised silver jhumka earrings with ghungroo details. Lightweight and perfect for Indo-western fusion looks.', price: 499, originalPrice: 799, category: 'women', subcategory: 'jewellery', brand: 'Silver Street', image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400', rating: 4.4, reviewCount: 1456, sizes: [], colors: ['Oxidised Silver', 'Antique Gold'], inStock: true, featured: false, tags: ['oxidised', 'jhumka', 'fusion', 'trendy'] },
-
-    // =============================================================
-    //  WOMEN'S — FOOTWEAR & ACCESSORIES
-    // =============================================================
-    { name: 'Embroidered Juttis for Women', description: 'Handcrafted Punjabi juttis with colourful embroidery. Cushioned sole for comfort. Goes with kurtis and sarees.', price: 999, originalPrice: 1499, category: 'women', subcategory: 'footwear', brand: 'Rajwada Fashion', image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400', rating: 4.5, reviewCount: 567, sizes: ['4', '5', '6', '7', '8', '9'], colors: ['Multi', 'Red & Gold', 'Pink & Green'], inStock: true, featured: false, tags: ['juttis', 'punjabi', 'embroidered', 'handcrafted'] },
-    { name: 'Payal Anklets (Pair)', description: 'Traditional silver-toned payal anklets with ghungroo bells. Musical tinkling sound. Adjustable size.', price: 399, originalPrice: 599, category: 'women', subcategory: 'accessories', brand: 'Silver Street', image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400', rating: 4.4, reviewCount: 890, sizes: [], colors: ['Silver', 'Antique Silver'], inStock: true, featured: false, tags: ['payal', 'anklets', 'ghungroo', 'traditional'] },
-
-    // =============================================================
-    //  MEN'S — KURTAS
-    // =============================================================
-    { name: 'Silk Kurta Pajama Set', description: 'Premium silk kurta with churidar pajama. Subtle self-design with golden buttons. Wedding and festive essential.', price: 3999, originalPrice: 5999, category: 'men', subcategory: 'kurtas', brand: 'Manyavar', image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400', rating: 4.6, reviewCount: 678, sizes: ['S', 'M', 'L', 'XL', 'XXL'], colors: ['Cream', 'Gold', 'Maroon'], inStock: true, featured: true, tags: ['silk', 'kurta-pajama', 'wedding', 'festive'] },
-    { name: 'Cotton Pathani Kurta', description: 'Comfortable cotton Pathani suit with side-slit kurta and matching salwar. Ideal for Eid and casual occasions.', price: 1799, originalPrice: 2499, category: 'men', subcategory: 'kurtas', brand: 'Fabindia', image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400', rating: 4.3, reviewCount: 534, sizes: ['S', 'M', 'L', 'XL', 'XXL'], colors: ['White', 'Black', 'Navy'], inStock: true, featured: false, tags: ['pathani', 'cotton', 'casual', 'eid'] },
-    { name: 'Linen Short Kurta', description: 'Modern short kurta in pure linen with Chinese collar. Minimalist design for everyday wear. Pairs with jeans or chinos.', price: 1299, originalPrice: null, category: 'men', subcategory: 'kurtas', brand: 'Fabindia', image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400', rating: 4.4, reviewCount: 890, sizes: ['S', 'M', 'L', 'XL', 'XXL'], colors: ['White', 'Sky Blue', 'Olive'], inStock: true, featured: false, tags: ['linen', 'short-kurta', 'casual', 'modern'] },
-    { name: 'Lucknowi Chikan Kurta', description: 'Hand-embroidered Lucknowi chikankari kurta in fine cotton. Traditional craft with modern fit. Festival ready.', price: 2499, originalPrice: 3499, category: 'men', subcategory: 'kurtas', brand: 'Manyavar', image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400', rating: 4.5, reviewCount: 456, sizes: ['M', 'L', 'XL', 'XXL'], colors: ['White', 'Peach', 'Powder Blue'], inStock: true, featured: true, tags: ['chikankari', 'lucknowi', 'handloom', 'festival'] },
-
-    // =============================================================
-    //  MEN'S — SHERWANIS
-    // =============================================================
-    { name: 'Royal Embroidered Sherwani', description: 'Grand sherwani with heavy thread and zardozi embroidery. Includes churidar and stole. Groom collection.', price: 12999, originalPrice: 19999, category: 'men', subcategory: 'sherwanis', brand: 'Manyavar', image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400', rating: 4.8, reviewCount: 345, sizes: ['S', 'M', 'L', 'XL', 'XXL'], colors: ['Ivory', 'Gold', 'Maroon'], inStock: true, featured: true, tags: ['sherwani', 'groom', 'wedding', 'embroidered', 'zardozi'] },
-    { name: 'Jodhpuri Bandhgala Sherwani', description: 'Sleek Jodhpuri style Bandhgala sherwani in jacquard fabric. Prince collar with concealed buttons. Royal Rajasthani feel.', price: 8999, originalPrice: 13499, category: 'men', subcategory: 'sherwanis', brand: 'Rajwada Fashion', image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400', rating: 4.6, reviewCount: 267, sizes: ['M', 'L', 'XL', 'XXL'], colors: ['Black', 'Navy', 'Wine'], inStock: true, featured: false, tags: ['jodhpuri', 'bandhgala', 'jacquard', 'formal'] },
-
-    // =============================================================
-    //  MEN'S — CASUAL SHIRTS & PANTS
-    // =============================================================
-    { name: 'Mandarin Collar Casual Shirt', description: 'Trendy mandarin collar shirt in premium cotton. Rolled-up sleeve tabs with contrast inner collar. Smart casual essential.', price: 1299, originalPrice: 1799, category: 'men', subcategory: 'shirts', brand: 'Peter England', image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400', rating: 4.2, reviewCount: 789, sizes: ['S', 'M', 'L', 'XL', 'XXL'], colors: ['White', 'Blue', 'Black'], inStock: true, featured: false, tags: ['mandarin', 'casual', 'cotton', 'smart'] },
-    { name: 'Printed Half-Sleeve Shirt', description: 'Tropical print half-sleeve shirt in lyocell fabric. Relaxed fit for weekend outings and beach vibes.', price: 999, originalPrice: null, category: 'men', subcategory: 'shirts', brand: 'Allen Solly', image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400', rating: 4.0, reviewCount: 567, sizes: ['S', 'M', 'L', 'XL'], colors: ['Blue Print', 'Green Print', 'Maroon Print'], inStock: true, featured: false, tags: ['printed', 'casual', 'half-sleeve', 'lyocell'] },
-    { name: 'Slim Fit Chino Trousers', description: 'Smart slim-fit chinos in stretch cotton. Versatile trouser for office and casual wear. Ankle length.', price: 1499, originalPrice: 1999, category: 'men', subcategory: 'pants', brand: 'Peter England', image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400', rating: 4.3, reviewCount: 634, sizes: ['28', '30', '32', '34', '36', '38'], colors: ['Khaki', 'Navy', 'Olive', 'Black'], inStock: true, featured: false, tags: ['chino', 'slim-fit', 'office', 'stretch'] },
-    { name: 'Relaxed Fit Cargo Joggers', description: 'Comfortable cargo joggers with multiple pockets. Elastic waist and cuffed ankles. Weekend essential.', price: 1199, originalPrice: null, category: 'men', subcategory: 'pants', brand: 'Allen Solly', image: 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=400', rating: 4.4, reviewCount: 456, sizes: ['S', 'M', 'L', 'XL'], colors: ['Black', 'Grey', 'Olive'], inStock: true, featured: false, tags: ['cargo', 'joggers', 'casual', 'comfort'] },
-    { name: 'Classic Denim Jeans', description: 'Mid-rise straight fit jeans in dark indigo wash. Premium denim with slight stretch for comfort all day.', price: 1799, originalPrice: 2499, category: 'men', subcategory: 'jeans', brand: 'Levi Strauss', image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400', rating: 4.5, reviewCount: 1567, sizes: ['28', '30', '32', '34', '36', '38'], colors: ['Dark Indigo', 'Black', 'Light Wash'], inStock: true, featured: true, tags: ['denim', 'jeans', 'classic', 'stretch'] },
-
-    // =============================================================
-    //  MEN'S — LUNGIS & DHOTIS
-    // =============================================================
-    { name: 'Cotton Lungi (Mundu)', description: 'Premium Kerala style cotton mundu with golden kasavu border. Double-layered for daily and temple wear.', price: 699, originalPrice: 999, category: 'men', subcategory: 'lungis', brand: 'Ramraj Cotton', image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400', rating: 4.3, reviewCount: 2345, sizes: ['Free Size'], colors: ['White & Gold', 'Cream & Gold'], inStock: true, featured: false, tags: ['mundu', 'kerala', 'kasavu', 'cotton', 'temple'] },
-    { name: 'Silk Dhoti with Border', description: 'Pure silk dhoti with contrast zari border. Essential for South Indian weddings and puja ceremonies.', price: 2499, originalPrice: 3999, category: 'men', subcategory: 'lungis', brand: 'Kanchivaram Silks', image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400', rating: 4.6, reviewCount: 456, sizes: ['Free Size'], colors: ['White & Gold', 'White & Maroon'], inStock: true, featured: false, tags: ['dhoti', 'silk', 'wedding', 'puja', 'south-indian'] },
-
-    // =============================================================
-    //  MEN'S — FOOTWEAR & ACCESSORIES
-    // =============================================================
-    { name: 'Kolhapuri Leather Chappal', description: 'Handcrafted genuine leather Kolhapuri chappal. Traditional Maharashtra footwear with modern comfort sole.', price: 899, originalPrice: 1299, category: 'men', subcategory: 'footwear', brand: 'Kolhapuri Craft', image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400', rating: 4.4, reviewCount: 678, sizes: ['6', '7', '8', '9', '10', '11'], colors: ['Tan', 'Brown', 'Black'], inStock: true, featured: false, tags: ['kolhapuri', 'leather', 'handcrafted', 'traditional'] },
-    { name: 'Mojari Embroidered Juttis', description: 'Rajasthani mojari juttis with intricate thread embroidery. Pointed toe traditional footwear for festive occasions.', price: 1199, originalPrice: null, category: 'men', subcategory: 'footwear', brand: 'Rajwada Fashion', image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400', rating: 4.3, reviewCount: 345, sizes: ['6', '7', '8', '9', '10', '11'], colors: ['Gold', 'Maroon', 'Black'], inStock: true, featured: false, tags: ['mojari', 'juttis', 'rajasthani', 'embroidered'] },
-
-    // =============================================================
-    //  KIDS — ETHNIC WEAR
-    // =============================================================
-    { name: 'Boys Dhoti Kurta Set', description: 'Adorable dhoti kurta set for little boys. Silk kurta with pre-stitched dhoti. Perfect for festivals, mundan and naming ceremonies.', price: 1299, originalPrice: 1899, category: 'kids', subcategory: 'kids-ethnic', brand: 'Little Manyavar', image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400', rating: 4.6, reviewCount: 567, sizes: ['1-2Y', '2-3Y', '3-4Y', '4-5Y', '5-6Y'], colors: ['Cream & Gold', 'White & Maroon', 'Blue & Gold'], inStock: true, featured: true, tags: ['dhoti-kurta', 'boys', 'festive', 'ceremony'] },
-    { name: 'Girls Lehenga Choli Set', description: 'Beautiful lehenga choli for girls with mirror and border work. Includes matching dupatta. Navratri and wedding special.', price: 1599, originalPrice: 2499, category: 'kids', subcategory: 'kids-ethnic', brand: 'Little Manyavar', image: 'https://images.unsplash.com/photo-1594463750939-ebb28c3f7f75?w=400', rating: 4.7, reviewCount: 456, sizes: ['2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y'], colors: ['Red', 'Pink', 'Orange & Green'], inStock: true, featured: true, tags: ['lehenga', 'girls', 'navratri', 'wedding'] },
-    { name: 'Boys Sherwani Set', description: 'Mini sherwani set for boys with churidar. Brocade fabric with embroidered collar. Wedding-ready little gentleman.', price: 2499, originalPrice: 3999, category: 'kids', subcategory: 'kids-ethnic', brand: 'Little Manyavar', image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400', rating: 4.5, reviewCount: 234, sizes: ['2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y', '7-8Y'], colors: ['Ivory', 'Gold', 'Wine'], inStock: true, featured: false, tags: ['sherwani', 'boys', 'brocade', 'wedding'] },
-    { name: 'Girls Pattu Pavadai Set', description: 'Traditional South Indian pattu pavadai (half-saree style) for girls. Pure silk with temple border. Ideal for puja and festivals.', price: 1999, originalPrice: null, category: 'kids', subcategory: 'kids-ethnic', brand: 'Kanchivaram Silks', image: 'https://images.unsplash.com/photo-1594463750939-ebb28c3f7f75?w=400', rating: 4.6, reviewCount: 345, sizes: ['2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y'], colors: ['Red & Gold', 'Green & Gold', 'Purple & Gold'], inStock: true, featured: false, tags: ['pattu-pavadai', 'south-indian', 'silk', 'puja'] },
-
-    // =============================================================
-    //  KIDS — CASUAL WEAR
-    // =============================================================
-    { name: 'Boys T-Shirt & Shorts Set', description: 'Fun printed cotton t-shirt with matching shorts. Comfortable elastic waist. Perfect for playtime and outings.', price: 699, originalPrice: 999, category: 'kids', subcategory: 'kids-casual', brand: 'Chhota Bheem', image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400', rating: 4.3, reviewCount: 1234, sizes: ['2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y', '7-8Y'], colors: ['Blue', 'Red', 'Green'], inStock: true, featured: false, tags: ['tshirt', 'shorts', 'boys', 'casual', 'playtime'] },
-    { name: 'Boys Casual Kurta & Pajama', description: 'Soft cotton kurta pajama set in block print. Comfortable daily wear for kids. Easy wash and maintain.', price: 799, originalPrice: null, category: 'kids', subcategory: 'kids-casual', brand: 'Fabindia', image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400', rating: 4.2, reviewCount: 567, sizes: ['2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y'], colors: ['White & Blue', 'Yellow & Green'], inStock: true, featured: false, tags: ['kurta', 'cotton', 'daily', 'block-print'] },
-    { name: 'Girls Tunic & Legging Set', description: 'Colourful printed tunic top with solid leggings. Soft cotton jersey fabric. Comfortable school and play wear.', price: 599, originalPrice: 899, category: 'kids', subcategory: 'kids-casual', brand: 'Max Kids', image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400', rating: 4.1, reviewCount: 890, sizes: ['2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y', '7-8Y'], colors: ['Pink', 'Purple', 'Yellow'], inStock: true, featured: false, tags: ['tunic', 'legging', 'girls', 'comfortable'] },
-
-    // =============================================================
-    //  KIDS — FROCKS
-    // =============================================================
-    { name: 'Party Wear Frock with Bow', description: 'Adorable party frock in net and satin with big bow detail. Layered tutu-style skirt. Birthday party special.', price: 1299, originalPrice: 1999, category: 'kids', subcategory: 'kids-frocks', brand: 'Max Kids', image: 'https://images.unsplash.com/photo-1594463750939-ebb28c3f7f75?w=400', rating: 4.5, reviewCount: 456, sizes: ['1-2Y', '2-3Y', '3-4Y', '4-5Y', '5-6Y'], colors: ['Pink', 'Red', 'White'], inStock: true, featured: true, tags: ['frock', 'party', 'birthday', 'tutu'] },
-    { name: 'Cotton Printed A-Line Frock', description: 'Casual cotton frock with all-over floral print. A-line cut with puff sleeves. Daily wear essential for girls.', price: 499, originalPrice: null, category: 'kids', subcategory: 'kids-frocks', brand: 'Chhota Bheem', image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400', rating: 4.0, reviewCount: 678, sizes: ['1-2Y', '2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y'], colors: ['Yellow Floral', 'Blue Floral', 'Pink Floral'], inStock: true, featured: false, tags: ['frock', 'cotton', 'floral', 'daily'] },
-
-    // =============================================================
-    //  KIDS — SETS
-    // =============================================================
-    { name: 'Baby Romper Gift Set', description: '3-piece baby romper gift set in organic cotton. Includes romper, bib and cap. Newborn essential.', price: 999, originalPrice: 1499, category: 'kids', subcategory: 'kids-sets', brand: 'Chhota Bheem', image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400', rating: 4.7, reviewCount: 567, sizes: ['0-6M', '6-12M', '12-18M'], colors: ['Yellow', 'Pink', 'Blue'], inStock: true, featured: false, tags: ['romper', 'baby', 'organic', 'gift-set', 'newborn'] },
-    { name: 'Kids Nehru Jacket Set', description: 'Stylish Nehru jacket with matching kurta and pajama. Perfect for Republic Day, Independence Day and school events.', price: 1499, originalPrice: null, category: 'kids', subcategory: 'kids-sets', brand: 'Little Manyavar', image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400', rating: 4.4, reviewCount: 234, sizes: ['3-4Y', '4-5Y', '5-6Y', '6-7Y', '7-8Y', '8-9Y'], colors: ['Saffron & White', 'Blue & White', 'Green & White'], inStock: true, featured: false, tags: ['nehru-jacket', 'school', 'patriotic', 'formal'] },
-
-    // =============================================================
-    //  SPECIAL — LIMITED EDITION
-    // =============================================================
-    { name: 'Bridal Kanjeevaram Collection', description: 'Limited edition bridal Kanjeevaram with real gold zari. Museum-quality weaving from master artisans. Once in a lifetime saree.', price: 49999, originalPrice: 69999, category: 'women', subcategory: 'sarees', brand: 'Kanchivaram Silks', image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400', rating: 5.0, reviewCount: 45, sizes: ['Free Size'], colors: ['Red & Gold'], inStock: false, featured: true, tags: ['limited-edition', 'bridal', 'kanjeevaram', 'gold-zari', 'heirloom'] },
-    { name: 'Hand-Painted Kalamkari Saree', description: 'Rare hand-painted Kalamkari saree from Srikalahasti. Natural vegetable dyes. Each piece is unique artwork.', price: 8999, originalPrice: null, category: 'women', subcategory: 'sarees', brand: 'Handloom House', image: 'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400', rating: 4.8, reviewCount: 123, sizes: ['Free Size'], colors: ['Natural & Red', 'Natural & Blue'], inStock: false, featured: true, tags: ['kalamkari', 'hand-painted', 'srikalahasti', 'unique'] },
+// ===============================================================
+//  SAREE GENERATION - 400 unique sarees
+// ===============================================================
+const sareeTypes = [
+  'Banarasi Silk', 'Kanjivaram Pure Silk', 'Chanderi Cotton', 'Pochampally Ikat',
+  'Mysore Crepe Silk', 'Paithani Silk', 'Tussar Silk', 'Bhagalpuri Silk',
+  'Gadwal Silk', 'Uppada Silk', 'Patola Double Ikat', 'Bandhani Tie-Dye',
+  'Sambalpuri Ikat', 'Tant Cotton', 'Muga Silk', 'Chiffon Printed',
+  'Georgette Embroidered', 'Organza Floral', 'Net Party Wear', 'Crepe De Chine',
+  'Linen Handloom', 'Jamdani Muslin', 'Bomkai Silk', 'Nauvari Maharashtra',
+  'Ilkal Karnataka', 'Kota Doria', 'Maheshwari Silk Cotton', 'Baluchari',
+  'Kasavu Kerala', 'Phulkari Punjab', 'Kalamkari Hand-Painted', 'Patan Patola',
+  'Khadi Cotton', 'Sico Handloom', 'Murshidabad Silk', 'Venkatagiri Cotton',
+  'Mangalagiri Cotton', 'Dharmavaram Silk', 'Molakalmuru Silk', 'Eri Silk',
 ];
 
-async function seed() {
-    try {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log('Connected to MongoDB');
+const sareeDesigns = [
+  'with Traditional Gold Zari Border', 'with Contrast Pallu', 'with Temple Motifs',
+  'with Floral Jaal Work', 'with Peacock Design', 'with Paisley Pattern',
+  'with Butis All Over', 'with Geometric Patterns', 'with Elephant Motifs',
+  'with Mango Design', 'with Checks Pattern', 'with Stripes Design',
+  'with Heavy Pallu', 'with Running Blouse', 'with Sequin Border',
+  'with Mirror Work', 'with Resham Embroidery', 'with Stone Work',
+  'with Cutwork Border', 'with Tassel Details',
+];
 
-        await Product.deleteMany({});
-        console.log('Cleared existing products');
+const sareeOccasions = [
+  'Wedding Collection', 'Festival Special', 'Daily Wear', 'Office Wear',
+  'Puja Special', 'Party Wear', 'Bridal Collection', 'Reception Wear',
+  'Mehendi Ceremony', 'Sangeet Night',
+];
 
-        const inserted = await Product.insertMany(products);
-        console.log(`Seeded ${inserted.length} products`);
+const sareeColors = [
+  ['Red & Gold', 'Maroon & Gold', 'Royal Blue & Gold'],
+  ['Green & Magenta', 'Purple & Silver', 'Orange & Yellow'],
+  ['Teal & Gold', 'Wine & Cream', 'Navy & Silver'],
+  ['Pink & Green', 'Mustard & Maroon', 'Peach & Gold'],
+  ['Black & Gold', 'Ivory & Red', 'Sea Green & Orange'],
+  ['Coral & Gold', 'Lavender & Silver', 'Off-White & Gold'],
+  ['Rust & Teal', 'Plum & Gold', 'Emerald & Gold'],
+  ['Turquoise & Red', 'Beige & Brown', 'Magenta & Gold'],
+];
 
-        const menCount = inserted.filter(p => p.category === 'men').length;
-        const womenCount = inserted.filter(p => p.category === 'women').length;
-        const kidsCount = inserted.filter(p => p.category === 'kids').length;
-        console.log(`  Women's: ${womenCount} products`);
-        console.log(`  Men's: ${menCount} products`);
-        console.log(`  Kids: ${kidsCount} products`);
+const sareeBrands = [
+  'Kanchivaram Silks', 'Fabindia', 'Handloom House', 'Mysore Silks',
+  'Nalli Silks', 'RMKV Silks', 'Chennai Silks', 'Pothy\'s',
+  'Sundari Silks', 'Jayalakshmi Silks', 'Kalyan Silks', 'Seematti',
+];
 
-        await mongoose.disconnect();
-        console.log('Done!');
-    } catch (error) {
-        console.error('Seed error:', error);
-        process.exit(1);
+const sareePriceRanges = {
+  'Silk': [4999, 25000], 'Cotton': [999, 3999], 'Handloom': [1999, 8999],
+  'Chiffon': [1499, 4999], 'Georgette': [1999, 6999], 'Organza': [2499, 7999],
+  'Net': [1999, 5999], 'Crepe': [1499, 4999], 'Linen': [1299, 3999],
+  'Muslin': [1999, 5999], 'Khadi': [999, 2999], 'Sico': [2999, 9999],
+};
+
+function getSareePrice(typeName) {
+  for (const [key, range] of Object.entries(sareePriceRanges)) {
+    if (typeName.includes(key)) return randBetween(range[0], range[1]);
+  }
+  return randBetween(1999, 9999);
+}
+
+const sareeDescriptions = [
+  'Exquisite handwoven masterpiece with intricate zari work. Rich pallu with traditional motifs. Perfect for weddings and festivals.',
+  'Authentic handloom saree crafted by master weavers. Pure fabric with contrast border and grand pallu. Temple-inspired motifs.',
+  'Lightweight and elegant saree with delicate butis. Sheer texture with golden border. Ideal for summer and daily puja wear.',
+  'Handcrafted saree with geometric patterns. Traditional weave technique passed through generations. GI tagged authentic craft.',
+  'Elegant saree with minimal yet sophisticated design. Easy to drape and comfortable. Perfect for office and casual occasions.',
+  'Special occasion saree with peacock pallu. Handwoven with real zari. Heirloom quality bridal wear.',
+  'Vibrant tie-dye saree with traditional Bandhani pattern. Rich colour palette with mirror work border. Festival special.',
+  'Contemporary design meets traditional weaving. Soft drape with modern colour palette. Versatile for any occasion.',
+  'Premium quality saree with rich texture and lustrous finish. Designed for the modern Indian woman. Goes from desk to dinner.',
+  'Classic heritage saree with timeless appeal. Intricate border work with elegant motifs. A wardrobe must-have.',
+];
+
+function generateSarees() {
+  const products = [];
+  const usedNames = new Set();
+  for (const type of sareeTypes) {
+    for (const design of sareeDesigns) {
+      const name = `${type} Saree ${design}`;
+      if (usedNames.has(name)) continue;
+      usedNames.add(name);
+      const occasion = pick(sareeOccasions);
+      const price = getSareePrice(type);
+      products.push({
+        name,
+        description: `${pick(sareeDescriptions)} ${occasion}.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'women',
+        subcategory: 'sarees',
+        brand: pick(sareeBrands),
+        image: pick(IMG.saree),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['Free Size'],
+        colors: pick(sareeColors),
+        inStock: Math.random() > 0.05,
+        featured: Math.random() > 0.88,
+        tags: name.toLowerCase().split(' ').filter(w => w.length > 2).concat(['saree', occasion.toLowerCase().split(' ')[0]]),
+      });
+      if (products.length >= 400) break;
     }
+    if (products.length >= 400) break;
+  }
+  return products;
+}
+
+// ===============================================================
+//  MEN'S COLLECTION - ~400 unique items
+// ===============================================================
+const mensBrands = [
+  'Manyavar', 'Fabindia', 'Peter England', 'Allen Solly',
+  'Raymond', 'Van Heusen', 'Louis Philippe', 'Arrow',
+  'Park Avenue', 'Ramraj Cotton', 'Siyaram', 'Biba Men',
+];
+
+function generateMensCollection() {
+  const products = [];
+
+  // --- Kurtas (60) ---
+  const kurtaFabrics = ['Silk', 'Cotton', 'Linen', 'Khadi', 'Jacquard', 'Chanderi'];
+  const kurtaStyles = ['Straight Cut', 'A-Line', 'Pathani', 'Angrakha', 'Short', 'Lucknowi Chikan', 'Nehru Collar', 'Band Collar', 'Chinese Collar', 'Mandarin Collar'];
+  for (const fabric of kurtaFabrics) {
+    for (const style of kurtaStyles) {
+      const name = `${style} ${fabric} Kurta`;
+      const price = randBetween(999, 5999);
+      products.push({
+        name,
+        description: `Premium ${fabric.toLowerCase()} kurta in ${style.toLowerCase()} design. Perfect for festivals, weddings and daily ethnic wear. Comfortable fit with fine craftsmanship.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'men',
+        subcategory: 'kurtas',
+        brand: pick(mensBrands),
+        image: pick(IMG.kurta),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+        colors: pick([['White', 'Cream', 'Gold'], ['Navy', 'Black', 'Maroon'], ['Sky Blue', 'Olive', 'Peach']]),
+        inStock: true, featured: Math.random() > 0.9,
+        tags: [fabric.toLowerCase(), style.toLowerCase(), 'kurta', 'ethnic', 'men'],
+      });
+    }
+  }
+
+  // --- Shirts (90) ---
+  const shirtTypes = ['Formal', 'Casual', 'Slim Fit', 'Regular Fit', 'Oxford', 'Mandarin Collar'];
+  const shirtFabrics = ['Cotton', 'Linen', 'Polyester Blend', 'Chambray', 'Denim'];
+  const shirtPatterns = ['Solid', 'Striped', 'Checked'];
+  for (const type of shirtTypes) {
+    for (const fabric of shirtFabrics) {
+      for (const pattern of shirtPatterns) {
+        const name = `${type} ${pattern} ${fabric} Shirt`;
+        const price = randBetween(799, 2999);
+        products.push({
+          name,
+          description: `${type} ${pattern.toLowerCase()} shirt in premium ${fabric.toLowerCase()}. Modern fit with attention to detail. Perfect for office and smart casual occasions.`,
+          price,
+          originalPrice: maybeOrigPrice(price),
+          category: 'men',
+          subcategory: 'shirts',
+          brand: pick(mensBrands),
+          image: pick(IMG.shirt),
+          rating: randRating(),
+          reviewCount: randReviews(),
+          sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+          colors: pick([['White', 'Blue', 'Black'], ['Navy', 'Grey', 'Wine'], ['Pink', 'Lavender', 'Mint']]),
+          inStock: true, featured: Math.random() > 0.92,
+          tags: [type.toLowerCase(), pattern.toLowerCase(), fabric.toLowerCase(), 'shirt', 'men'],
+        });
+      }
+    }
+  }
+
+  // --- T-Shirts (60) ---
+  const tshirtStyles = ['Round Neck', 'V-Neck', 'Polo', 'Henley', 'Oversized', 'Graphic'];
+  const tshirtFabrics = ['Cotton', 'Polyester', 'Tri-blend', 'Organic Cotton', 'Bamboo Blend'];
+  const tshirtPatterns = ['Solid', 'Printed'];
+  for (const style of tshirtStyles) {
+    for (const fabric of tshirtFabrics) {
+      for (const pattern of tshirtPatterns) {
+        const name = `${style} ${pattern} ${fabric} T-Shirt`;
+        const price = randBetween(399, 1999);
+        products.push({
+          name,
+          description: `Comfortable ${style.toLowerCase()} t-shirt in ${fabric.toLowerCase()}. ${pattern} design. Perfect for casual outings and daily wear.`,
+          price,
+          originalPrice: maybeOrigPrice(price),
+          category: 'men',
+          subcategory: 't-shirts',
+          brand: pick(mensBrands),
+          image: pick(IMG.tshirt),
+          rating: randRating(),
+          reviewCount: randReviews(),
+          sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+          colors: pick([['Black', 'White', 'Grey'], ['Navy', 'Olive', 'Maroon'], ['Red', 'Blue', 'Yellow']]),
+          inStock: true, featured: Math.random() > 0.93,
+          tags: [style.toLowerCase(), fabric.toLowerCase(), 'tshirt', 'casual', 'men'],
+        });
+      }
+    }
+  }
+
+  // --- Pants (54) ---
+  const pantsTypes = ['Slim Fit', 'Regular Fit', 'Relaxed Fit'];
+  const pantsFabrics = ['Cotton Chino', 'Linen', 'Polyester Blend', 'Stretch Cotton', 'Cargo', 'Jogger'];
+  const pantsColors = ['Solid', 'Textured', 'Pleated'];
+  for (const type of pantsTypes) {
+    for (const fabric of pantsFabrics) {
+      for (const style of pantsColors) {
+        const name = `${type} ${style} ${fabric} Trousers`;
+        const price = randBetween(899, 2999);
+        products.push({
+          name,
+          description: `Smart ${type.toLowerCase()} trousers in ${fabric.toLowerCase()}. ${style} finish. Versatile for office and casual wear.`,
+          price,
+          originalPrice: maybeOrigPrice(price),
+          category: 'men',
+          subcategory: 'pants',
+          brand: pick(mensBrands),
+          image: pick(IMG.pants),
+          rating: randRating(),
+          reviewCount: randReviews(),
+          sizes: ['28', '30', '32', '34', '36', '38'],
+          colors: pick([['Khaki', 'Navy', 'Black'], ['Olive', 'Grey', 'Brown'], ['Beige', 'Charcoal', 'Wine']]),
+          inStock: true, featured: Math.random() > 0.92,
+          tags: [type.toLowerCase(), fabric.toLowerCase(), 'trousers', 'pants', 'men'],
+        });
+      }
+    }
+  }
+
+  // --- Jeans (48) ---
+  const jeansFits = ['Slim', 'Skinny', 'Straight', 'Relaxed', 'Tapered', 'Bootcut'];
+  const jeansWash = ['Dark Indigo', 'Medium Wash', 'Light Wash', 'Black Denim', 'Grey Denim', 'Ripped Distressed', 'Raw Denim', 'Acid Wash'];
+  for (const fit of jeansFits) {
+    for (const wash of jeansWash) {
+      const name = `${fit} Fit ${wash} Jeans`;
+      const price = randBetween(1299, 3499);
+      products.push({
+        name,
+        description: `${fit} fit jeans in ${wash.toLowerCase()} finish. Premium denim with slight stretch for all-day comfort. Essential men's wardrobe staple.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'men',
+        subcategory: 'jeans',
+        brand: pick(mensBrands),
+        image: pick(IMG.jeans),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['28', '30', '32', '34', '36', '38'],
+        colors: [wash],
+        inStock: true, featured: Math.random() > 0.9,
+        tags: [fit.toLowerCase(), wash.toLowerCase(), 'jeans', 'denim', 'men'],
+      });
+    }
+  }
+
+  // --- Sherwanis (30) ---
+  const sherwaniStyles = ['Royal Embroidered', 'Jodhpuri Bandhgala', 'Indo-Western', 'Nehru Jacket Style', 'Angrakha', 'Classic'];
+  const shervaniFabrics = ['Silk', 'Brocade', 'Jacquard', 'Velvet', 'Art Silk'];
+  for (const style of sherwaniStyles) {
+    for (const fabric of shervaniFabrics) {
+      const name = `${style} ${fabric} Sherwani`;
+      const price = randBetween(5999, 19999);
+      products.push({
+        name,
+        description: `Grand ${style.toLowerCase()} sherwani in premium ${fabric.toLowerCase()}. Perfect for groom, wedding and reception occasions. Includes churidar.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'men',
+        subcategory: 'sherwanis',
+        brand: pick(['Manyavar', 'Raymond', 'Rajwada Fashion', 'Fabindia']),
+        image: pick(IMG.sherwani),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+        colors: pick([['Ivory', 'Gold', 'Maroon'], ['Black', 'Navy', 'Wine'], ['Cream', 'Silver', 'Royal Blue']]),
+        inStock: Math.random() > 0.1, featured: Math.random() > 0.85,
+        tags: [style.toLowerCase(), fabric.toLowerCase(), 'sherwani', 'wedding', 'groom', 'men'],
+      });
+    }
+  }
+
+  // --- Blazers (24) ---
+  const blazerStyles = ['Single Breasted', 'Double Breasted', 'Nehru Jacket', 'Casual'];
+  const blazerFabrics = ['Wool Blend', 'Linen', 'Cotton', 'Velvet', 'Tweed', 'Polyester'];
+  for (const style of blazerStyles) {
+    for (const fabric of blazerFabrics) {
+      const name = `${style} ${fabric} Blazer`;
+      const price = randBetween(2999, 8999);
+      products.push({
+        name,
+        description: `Sophisticated ${style.toLowerCase()} blazer in ${fabric.toLowerCase()}. Tailored fit with modern detailing. Perfect for formal events and smart casual occasions.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'men',
+        subcategory: 'blazers',
+        brand: pick(mensBrands),
+        image: pick(IMG.blazer),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+        colors: pick([['Black', 'Navy', 'Charcoal'], ['Brown', 'Olive', 'Burgundy']]),
+        inStock: true, featured: Math.random() > 0.88,
+        tags: [style.toLowerCase(), fabric.toLowerCase(), 'blazer', 'formal', 'men'],
+      });
+    }
+  }
+
+  // --- Lungis & Dhotis (12) ---
+  const lungiTypes = ['Cotton Mundu', 'Silk Dhoti', 'Printed Lungi', 'Kasavu Mundu', 'Colour Lungi', 'Handloom Dhoti'];
+  const lungiStyles = ['with Golden Border', 'with Zari Border'];
+  for (const type of lungiTypes) {
+    for (const style of lungiStyles) {
+      const name = `${type} ${style}`;
+      const price = type.includes('Silk') ? randBetween(1999, 4999) : randBetween(399, 1499);
+      products.push({
+        name,
+        description: `Traditional ${type.toLowerCase()} ${style.toLowerCase()}. Essential South Indian ethnic wear for temple, puja and daily use. Comfortable and classic.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'men',
+        subcategory: 'lungis',
+        brand: pick(['Ramraj Cotton', 'Kanchivaram Silks', 'Fabindia']),
+        image: pick(IMG.lungi),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['Free Size'],
+        colors: pick([['White & Gold', 'Cream & Gold'], ['White & Maroon', 'White & Green']]),
+        inStock: true, featured: Math.random() > 0.9,
+        tags: [type.toLowerCase().split(' ')[0], 'lungi', 'dhoti', 'traditional', 'men'],
+      });
+    }
+  }
+
+  // --- Men's Footwear (15) ---
+  const footwearTypes = ['Kolhapuri Chappal', 'Mojari Juttis', 'Leather Sandals', 'Formal Oxford Shoes', 'Casual Loafers'];
+  const footwearMaterials = ['Genuine Leather', 'Vegan Leather', 'Suede'];
+  for (const type of footwearTypes) {
+    for (const material of footwearMaterials) {
+      const name = `${material} ${type}`;
+      const price = randBetween(799, 3999);
+      products.push({
+        name,
+        description: `Handcrafted ${material.toLowerCase()} ${type.toLowerCase()}. Premium quality with cushioned sole. Traditional Indian footwear with modern comfort.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'men',
+        subcategory: 'footwear',
+        brand: pick(['Kolhapuri Craft', 'Rajwada Fashion', 'Bata', 'Woodland']),
+        image: pick(IMG.footwear),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['6', '7', '8', '9', '10', '11'],
+        colors: pick([['Tan', 'Brown', 'Black'], ['Maroon', 'Gold', 'Black']]),
+        inStock: true, featured: Math.random() > 0.9,
+        tags: [type.toLowerCase().split(' ')[0], material.toLowerCase().split(' ')[0], 'footwear', 'men'],
+      });
+    }
+  }
+
+  // --- Men's Accessories (12) ---
+  const accessoryTypes = ['Silk Pocket Square', 'Brooch Set', 'Turban (Safa)', 'Cufflinks Set', 'Tie & Pocket Square Set', 'Leather Belt'];
+  const accessoryStyles = ['Traditional', 'Modern'];
+  for (const type of accessoryTypes) {
+    for (const style of accessoryStyles) {
+      const name = `${style} ${type}`;
+      const price = randBetween(299, 2499);
+      products.push({
+        name,
+        description: `${style} ${type.toLowerCase()} for the well-dressed gentleman. Elevate your ethnic or formal look with this premium accessory.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'men',
+        subcategory: 'accessories',
+        brand: pick(mensBrands),
+        image: pick(IMG.accessories),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: type.includes('Belt') ? ['S', 'M', 'L', 'XL'] : [],
+        colors: pick([['Gold', 'Silver', 'Black'], ['Maroon', 'Navy', 'White']]),
+        inStock: true, featured: Math.random() > 0.92,
+        tags: [type.toLowerCase().split(' ')[0], style.toLowerCase(), 'accessories', 'men'],
+      });
+    }
+  }
+
+  return products;
+}
+
+// ===============================================================
+//  WOMEN'S OTHER (Non-Saree) - ~155 items
+// ===============================================================
+const womensBrands = [
+  'Sabyasachi Style', 'Meena Bazaar', 'W for Woman', 'Biba', 'Fabindia',
+  'Rajwada Fashion', 'Tanishq Style', 'Silver Street', 'Aurelia', 'Global Desi',
+];
+
+function generateWomensOther() {
+  const products = [];
+
+  // --- Lehengas (30) ---
+  const lehengaTypes = ['Bridal Heavy', 'Mirror Work', 'Pastel Party Wear', 'A-Line', 'Mermaid Cut', 'Flared Ghagra'];
+  const lehengaFabrics = ['Raw Silk', 'Georgette', 'Net', 'Velvet', 'Art Silk'];
+  for (const type of lehengaTypes) {
+    for (const fabric of lehengaFabrics) {
+      const name = `${type} ${fabric} Lehenga Choli`;
+      const price = randBetween(3999, 24999);
+      products.push({
+        name,
+        description: `Stunning ${type.toLowerCase()} lehenga in ${fabric.toLowerCase()} with embroidery and sequin work. Includes matching choli and net dupatta. Wedding and festival collection.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'women',
+        subcategory: 'lehengas',
+        brand: pick(womensBrands),
+        image: pick(IMG.lehenga),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['S', 'M', 'L', 'XL'],
+        colors: pick([['Red', 'Maroon', 'Pink'], ['Lavender', 'Mint', 'Peach'], ['Orange', 'Blue', 'Green']]),
+        inStock: Math.random() > 0.05, featured: Math.random() > 0.85,
+        tags: [type.toLowerCase().split(' ')[0], fabric.toLowerCase(), 'lehenga', 'women'],
+      });
+    }
+  }
+
+  // --- Salwar Suits (20) ---
+  const salwarTypes = ['Anarkali', 'Patiala', 'Palazzo', 'Straight Cut', 'Churidar'];
+  const salwarFabrics = ['Georgette', 'Cotton', 'Chanderi', 'Rayon'];
+  for (const type of salwarTypes) {
+    for (const fabric of salwarFabrics) {
+      const name = `${type} ${fabric} Salwar Suit`;
+      const price = randBetween(1499, 7999);
+      products.push({
+        name,
+        description: `Elegant ${type.toLowerCase()} suit in ${fabric.toLowerCase()} with matching dupatta. Comfortable and stylish for festive and daily wear.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'women',
+        subcategory: 'salwar-suits',
+        brand: pick(womensBrands),
+        image: pick(IMG.salwar),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+        colors: pick([['Wine', 'Teal', 'Mustard'], ['White & Gold', 'Navy & Silver', 'Black & Red']]),
+        inStock: true, featured: Math.random() > 0.88,
+        tags: [type.toLowerCase(), fabric.toLowerCase(), 'salwar-suit', 'women'],
+      });
+    }
+  }
+
+  // --- Kurtis (30) ---
+  const kurtiStyles = ['Straight Cut', 'A-Line', 'Anarkali', 'Shirt Style', 'Kaftan', 'Asymmetric'];
+  const kurtiFabrics = ['Cotton', 'Rayon', 'Silk', 'Georgette', 'Chanderi'];
+  for (const style of kurtiStyles) {
+    for (const fabric of kurtiFabrics) {
+      const name = `${style} ${fabric} Kurti`;
+      const price = randBetween(599, 2999);
+      products.push({
+        name,
+        description: `Stylish ${style.toLowerCase()} kurti in premium ${fabric.toLowerCase()}. Modern design with traditional charm. Perfect for office, casual and festive wear.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'women',
+        subcategory: 'kurtis',
+        brand: pick(womensBrands),
+        image: pick(IMG.kurti),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+        colors: pick([['White', 'Peach', 'Sky Blue'], ['Mustard', 'Olive', 'Maroon'], ['Red', 'Navy', 'Emerald']]),
+        inStock: true, featured: Math.random() > 0.9,
+        tags: [style.toLowerCase(), fabric.toLowerCase(), 'kurti', 'women'],
+      });
+    }
+  }
+
+  // --- Dupattas (15) ---
+  const dupattaTypes = ['Bandhani', 'Phulkari', 'Chiffon', 'Banarasi', 'Chanderi'];
+  const dupattaStyles = ['Silk', 'Cotton', 'Net'];
+  for (const type of dupattaTypes) {
+    for (const fabric of dupattaStyles) {
+      const name = `${type} ${fabric} Dupatta`;
+      const price = randBetween(499, 2499);
+      products.push({
+        name,
+        description: `Beautiful ${type.toLowerCase()} dupatta in ${fabric.toLowerCase()}. Vibrant colours with traditional work. Perfect complement to any ethnic outfit.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'women',
+        subcategory: 'dupattas',
+        brand: pick(womensBrands),
+        image: pick(IMG.dupatta),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['Free Size'],
+        colors: pick([['Red & Yellow', 'Green & Orange', 'Pink & Purple'], ['Gold & Maroon', 'Cream & Red']]),
+        inStock: true, featured: Math.random() > 0.9,
+        tags: [type.toLowerCase(), fabric.toLowerCase(), 'dupatta', 'women'],
+      });
+    }
+  }
+
+  // --- Blouses (15) ---
+  const blouseTypes = ['Readymade Embroidered', 'Designer Zardozi', 'Padded Sequin', 'Mirror Work', 'Silk Brocade'];
+  const blouseStyles = ['Round Neck', 'Boat Neck', 'Deep Back'];
+  for (const type of blouseTypes) {
+    for (const style of blouseStyles) {
+      const name = `${type} ${style} Blouse`;
+      const price = randBetween(599, 2999);
+      products.push({
+        name,
+        description: `${type} blouse with ${style.toLowerCase()} design. Perfectly pairs with silk and designer sarees. Premium finish with padding.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'women',
+        subcategory: 'blouses',
+        brand: pick(womensBrands),
+        image: pick(IMG.blouse),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['32', '34', '36', '38', '40'],
+        colors: pick([['Gold', 'Red', 'Green', 'Black'], ['Maroon', 'Navy', 'Silver']]),
+        inStock: true, featured: Math.random() > 0.9,
+        tags: [type.toLowerCase().split(' ')[0], style.toLowerCase(), 'blouse', 'women'],
+      });
+    }
+  }
+
+  // --- Jewellery (20) ---
+  const jewelleryTypes = ['Temple', 'Kundan', 'Polki', 'Meenakari', 'Oxidised Silver'];
+  const jewelleryItems = ['Necklace Set', 'Choker Set', 'Jhumka Earrings', 'Bangles Set'];
+  for (const type of jewelleryTypes) {
+    for (const item of jewelleryItems) {
+      const name = `${type} ${item}`;
+      const price = randBetween(499, 5999);
+      products.push({
+        name,
+        description: `Exquisite ${type.toLowerCase()} ${item.toLowerCase()}. Gold-plated with traditional craftsmanship. Perfect for weddings, puja and festive occasions.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'women',
+        subcategory: 'jewellery',
+        brand: pick(['Tanishq Style', 'Silver Street', 'Kalyan Jewellers', 'Joyalukkas']),
+        image: pick(IMG.jewellery),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: [],
+        colors: pick([['Gold & Ruby', 'Gold & Emerald'], ['Gold & Pearl', 'Antique Gold'], ['Oxidised Silver']]),
+        inStock: true, featured: Math.random() > 0.85,
+        tags: [type.toLowerCase(), item.toLowerCase().split(' ')[0], 'jewellery', 'women'],
+      });
+    }
+  }
+
+  // --- Women's Footwear (15) ---
+  const wFootwearTypes = ['Embroidered Juttis', 'Kolhapuri Chappals', 'Block Heel Sandals', 'Wedge Sandals', 'Mojari Flats'];
+  const wFootwearMaterials = ['Leather', 'Vegan Leather', 'Fabric'];
+  for (const type of wFootwearTypes) {
+    for (const material of wFootwearMaterials) {
+      const name = `Women's ${material} ${type}`;
+      const price = randBetween(599, 2999);
+      products.push({
+        name,
+        description: `Handcrafted ${material.toLowerCase()} ${type.toLowerCase()}. Cushioned sole for all-day comfort. Pairs beautifully with ethnic outfits.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'women',
+        subcategory: 'footwear',
+        brand: pick(['Rajwada Fashion', 'Metro', 'Bata', 'Catwalk']),
+        image: pick(IMG.footwear),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['4', '5', '6', '7', '8', '9'],
+        colors: pick([['Multi', 'Red & Gold', 'Pink & Green'], ['Gold', 'Silver', 'Black']]),
+        inStock: true, featured: Math.random() > 0.9,
+        tags: [type.toLowerCase().split(' ')[0], material.toLowerCase(), 'footwear', 'women'],
+      });
+    }
+  }
+
+  // --- Women's Accessories (10) ---
+  const wAccessTypes = ['Payal Anklets', 'Kamarband Belt', 'Maang Tikka', 'Hair Accessory Set', 'Clutch Bag'];
+  const wAccessStyles = ['Traditional Gold', 'Silver Oxidised'];
+  for (const type of wAccessTypes) {
+    for (const style of wAccessStyles) {
+      const name = `${style} ${type}`;
+      const price = randBetween(299, 1999);
+      products.push({
+        name,
+        description: `${style} ${type.toLowerCase()}. Adds the perfect finishing touch to your ethnic ensemble. Premium quality craftsmanship.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'women',
+        subcategory: 'accessories',
+        brand: pick(womensBrands),
+        image: pick(IMG.accessories),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: [],
+        colors: pick([['Gold', 'Silver'], ['Antique Gold', 'Rose Gold']]),
+        inStock: true, featured: Math.random() > 0.92,
+        tags: [type.toLowerCase().split(' ')[0], style.toLowerCase().split(' ')[0], 'accessories', 'women'],
+      });
+    }
+  }
+
+  return products;
+}
+
+// ===============================================================
+//  KIDS COLLECTION - ~59 items
+// ===============================================================
+function generateKidsCollection() {
+  const products = [];
+  const kidsBrands = ['Little Manyavar', 'Chhota Bheem', 'Fabindia', 'Max Kids', 'Firstcry Exclusive'];
+
+  // --- Kids Ethnic (20) ---
+  const kidsEthnicTypes = ['Boys Dhoti Kurta Set', 'Girls Lehenga Choli', 'Boys Sherwani Set', 'Girls Pattu Pavadai'];
+  const kidsEthnicFabrics = ['Silk', 'Cotton Silk', 'Art Silk', 'Brocade', 'Chanderi'];
+  for (const type of kidsEthnicTypes) {
+    for (const fabric of kidsEthnicFabrics) {
+      const name = `${type} in ${fabric}`;
+      const price = randBetween(799, 3999);
+      products.push({
+        name,
+        description: `Adorable ${type.toLowerCase()} in premium ${fabric.toLowerCase()}. Perfect for festivals, weddings and ceremonies. Comfortable fit for little ones.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'kids',
+        subcategory: 'kids-ethnic',
+        brand: pick(kidsBrands),
+        image: pick(IMG.kids),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['1-2Y', '2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y'],
+        colors: pick([['Cream & Gold', 'White & Maroon', 'Blue & Gold'], ['Red', 'Pink', 'Orange & Green']]),
+        inStock: true, featured: Math.random() > 0.85,
+        tags: name.toLowerCase().split(' ').filter(w => w.length > 2).concat(['kids', 'ethnic']),
+      });
+    }
+  }
+
+  // --- Kids Casual (15) ---
+  const kidsCasualTypes = ['Boys T-Shirt & Shorts Set', 'Boys Casual Kurta Pajama', 'Girls Tunic & Legging Set'];
+  const kidsCasualFabrics = ['Cotton', 'Jersey', 'Cotton Blend', 'Organic Cotton', 'Bamboo Blend'];
+  for (const type of kidsCasualTypes) {
+    for (const fabric of kidsCasualFabrics) {
+      const name = `${type} in ${fabric}`;
+      const price = randBetween(399, 1499);
+      products.push({
+        name,
+        description: `Comfortable ${type.toLowerCase()} in soft ${fabric.toLowerCase()}. Easy to wash and maintain. Perfect for playtime and daily wear.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'kids',
+        subcategory: 'kids-casual',
+        brand: pick(kidsBrands),
+        image: pick(IMG.kids),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y', '7-8Y'],
+        colors: pick([['Blue', 'Red', 'Green'], ['Pink', 'Purple', 'Yellow']]),
+        inStock: true, featured: Math.random() > 0.9,
+        tags: name.toLowerCase().split(' ').filter(w => w.length > 2).concat(['kids', 'casual']),
+      });
+    }
+  }
+
+  // --- Kids Frocks (12) ---
+  const frockTypes = ['Party Wear', 'Cotton Printed', 'Tutu Net', 'A-Line Floral'];
+  const frockStyles = ['with Bow', 'with Frill', 'with Lace'];
+  for (const type of frockTypes) {
+    for (const style of frockStyles) {
+      const name = `${type} Frock ${style}`;
+      const price = randBetween(399, 1999);
+      products.push({
+        name,
+        description: `Adorable ${type.toLowerCase()} frock ${style.toLowerCase()} for little girls. Beautiful design with comfortable fit. Birthday and party special.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'kids',
+        subcategory: 'kids-frocks',
+        brand: pick(kidsBrands),
+        image: pick(IMG.kids),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: ['1-2Y', '2-3Y', '3-4Y', '4-5Y', '5-6Y'],
+        colors: pick([['Pink', 'Red', 'White'], ['Yellow', 'Blue', 'Peach']]),
+        inStock: true, featured: Math.random() > 0.88,
+        tags: name.toLowerCase().split(' ').filter(w => w.length > 2).concat(['kids', 'frock']),
+      });
+    }
+  }
+
+  // --- Kids Sets (12) ---
+  const kidsSetTypes = ['Baby Romper Gift Set', 'Nehru Jacket Set', 'Dungaree Set', 'Ethnic Combo Set'];
+  const kidsSetFabrics = ['Organic Cotton', 'Cotton Blend', 'Silk Blend'];
+  for (const type of kidsSetTypes) {
+    for (const fabric of kidsSetFabrics) {
+      const name = `${type} in ${fabric}`;
+      const price = randBetween(599, 2499);
+      products.push({
+        name,
+        description: `Lovely ${type.toLowerCase()} in ${fabric.toLowerCase()}. Makes a wonderful gift or everyday wear. Premium quality for your little ones.`,
+        price,
+        originalPrice: maybeOrigPrice(price),
+        category: 'kids',
+        subcategory: 'kids-sets',
+        brand: pick(kidsBrands),
+        image: pick(IMG.kids),
+        rating: randRating(),
+        reviewCount: randReviews(),
+        sizes: type.includes('Baby') ? ['0-6M', '6-12M', '12-18M'] : ['2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y', '7-8Y'],
+        colors: pick([['Yellow', 'Pink', 'Blue'], ['Saffron & White', 'Blue & White', 'Green & White']]),
+        inStock: true, featured: Math.random() > 0.88,
+        tags: name.toLowerCase().split(' ').filter(w => w.length > 2).concat(['kids', 'set']),
+      });
+    }
+  }
+
+  return products;
+}
+
+// ===============================================================
+//  MAIN SEED FUNCTION
+// ===============================================================
+async function seed() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('[OK] Connected to MongoDB');
+
+    console.log('\n[...] Generating products...');
+    const sarees = generateSarees();
+    const mensCollection = generateMensCollection();
+    const womensOther = generateWomensOther();
+    const kidsCollection = generateKidsCollection();
+
+    const allProducts = [
+      ...sarees,
+      ...mensCollection,
+      ...womensOther,
+      ...kidsCollection,
+    ];
+
+    // -- Deduplication: ensure no name repeats > 10 times --
+    const nameCount = {};
+    const uniqueProducts = [];
+    for (const p of allProducts) {
+      const key = p.name.toLowerCase().trim();
+      nameCount[key] = (nameCount[key] || 0) + 1;
+      if (nameCount[key] <= 10) {
+        uniqueProducts.push(p);
+      }
+    }
+
+    console.log('   Generated: ' + allProducts.length);
+    console.log('   After dedup (max 10 per name): ' + uniqueProducts.length);
+
+    // -- Clear existing products --
+    await Product.deleteMany({});
+    console.log('[OK] Cleared existing products');
+
+    // -- Batch insert (100 at a time) --
+    let inserted = 0;
+    for (let i = 0; i < uniqueProducts.length; i += 100) {
+      const batch = uniqueProducts.slice(i, i + 100);
+      await Product.insertMany(batch);
+      inserted += batch.length;
+      console.log('   Inserted ' + inserted + ' / ' + uniqueProducts.length);
+    }
+
+    // -- Summary stats --
+    const menCount = uniqueProducts.filter((p) => p.category === 'men').length;
+    const womenCount = uniqueProducts.filter((p) => p.category === 'women').length;
+    const kidsCount = uniqueProducts.filter((p) => p.category === 'kids').length;
+
+    const subcats = {};
+    uniqueProducts.forEach((p) => {
+      subcats[p.subcategory] = (subcats[p.subcategory] || 0) + 1;
+    });
+
+    console.log('\n=======================================');
+    console.log('[OK] SEEDED ' + inserted + ' PRODUCTS');
+    console.log('=======================================');
+    console.log("   Women's: " + womenCount);
+    console.log("   Men's:   " + menCount);
+    console.log("   Kids:    " + kidsCount);
+    console.log('\n   By subcategory:');
+    Object.entries(subcats)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([sub, count]) => console.log('     ' + sub + ': ' + count));
+
+    await mongoose.disconnect();
+    console.log('\n[OK] Done! Database disconnected.');
+  } catch (error) {
+    console.error('[ERROR] Seed error:', error);
+    process.exit(1);
+  }
 }
 
 seed();

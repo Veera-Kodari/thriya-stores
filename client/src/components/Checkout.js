@@ -7,7 +7,7 @@ function Checkout({ token, cart, setCart }) {
   const [step, setStep] = useState(1);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddr, setSelectedAddr] = useState(null);
-  const [newAddr, setNewAddr] = useState({ street: '', city: '', state: '', pincode: '', phone: '' });
+  const [newAddr, setNewAddr] = useState({ fullName: '', phone: '', addressLine1: '', city: '', state: '', pincode: '' });
   const [showNewAddr, setShowNewAddr] = useState(false);
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(null);
@@ -40,8 +40,8 @@ function Checkout({ token, cart, setCart }) {
 
   const handlePlaceOrder = async () => {
     const addr = selectedAddr || newAddr;
-    if (!addr.street || !addr.city || !addr.state || !addr.pincode) {
-      setError('Please fill in all address fields');
+    if (!addr.addressLine1 || !addr.city || !addr.state || !addr.pincode || !addr.fullName || !addr.phone) {
+      setError('Please fill in all address fields including name and phone');
       return;
     }
     setLoading(true);
@@ -58,11 +58,13 @@ function Checkout({ token, cart, setCart }) {
           image: item.image,
         })),
         shippingAddress: {
-          street: addr.street,
+          fullName: addr.fullName,
+          phone: addr.phone,
+          addressLine1: addr.addressLine1,
+          addressLine2: addr.addressLine2 || '',
           city: addr.city,
           state: addr.state,
           pincode: addr.pincode,
-          phone: addr.phone || '',
         },
         paymentMethod: 'COD',
         totalAmount: total,
@@ -145,9 +147,10 @@ function Checkout({ token, cart, setCart }) {
                   <div key={i} className={`addr-card ${selectedAddr === addr ? 'selected' : ''}`} onClick={() => { setSelectedAddr(addr); setShowNewAddr(false); }}>
                     <span className="addr-radio">{selectedAddr === addr ? '●' : '○'}</span>
                     <div className="addr-details">
-                      <p>{addr.street}</p>
+                      <p className="addr-name">{addr.fullName}</p>
+                      <p>{addr.addressLine1}</p>
                       <p>{addr.city}, {addr.state} - {addr.pincode}</p>
-                      {addr.phone && <p>📞 {addr.phone}</p>}
+                      <p>📞 {addr.phone}</p>
                       {addr.isDefault && <span className="addr-default">Default</span>}
                     </div>
                   </div>
@@ -159,23 +162,23 @@ function Checkout({ token, cart, setCart }) {
             </button>
             {showNewAddr && (
               <div className="new-addr-form">
-                <input placeholder="Street Address *" value={newAddr.street} onChange={e => setNewAddr({...newAddr, street: e.target.value})} className="checkout-input" />
+                <input placeholder="Full Name *" value={newAddr.fullName} onChange={e => setNewAddr({...newAddr, fullName: e.target.value})} className="checkout-input" />
+                <input placeholder="Phone Number *" value={newAddr.phone} onChange={e => setNewAddr({...newAddr, phone: e.target.value.replace(/\D/g,'').slice(0,10)})} className="checkout-input" maxLength={10} />
+                <input placeholder="Address Line 1 (House No, Street) *" value={newAddr.addressLine1} onChange={e => setNewAddr({...newAddr, addressLine1: e.target.value})} className="checkout-input" />
                 <div className="addr-row">
                   <input placeholder="City *" value={newAddr.city} onChange={e => setNewAddr({...newAddr, city: e.target.value})} className="checkout-input" />
                   <input placeholder="State *" value={newAddr.state} onChange={e => setNewAddr({...newAddr, state: e.target.value})} className="checkout-input" />
                 </div>
-                <div className="addr-row">
-                  <input placeholder="Pincode *" value={newAddr.pincode} onChange={e => setNewAddr({...newAddr, pincode: e.target.value.replace(/\D/g,'').slice(0,6)})} className="checkout-input" maxLength={6} />
-                  <input placeholder="Phone" value={newAddr.phone} onChange={e => setNewAddr({...newAddr, phone: e.target.value.replace(/\D/g,'').slice(0,10)})} className="checkout-input" maxLength={10} />
-                </div>
+                <input placeholder="Pincode *" value={newAddr.pincode} onChange={e => setNewAddr({...newAddr, pincode: e.target.value.replace(/\D/g,'').slice(0,6)})} className="checkout-input" maxLength={6} />
               </div>
             )}
             <button className="checkout-next-btn" onClick={() => {
               const addr = selectedAddr || newAddr;
-              if (!addr.street || !addr.city || !addr.state || !addr.pincode) {
-                setError('Please fill all address fields'); return;
+              if (!addr.fullName || !addr.phone || !addr.addressLine1 || !addr.city || !addr.state || !addr.pincode) {
+                setError('Please fill all address fields including name and phone'); return;
               }
-              if (newAddr.pincode && newAddr.pincode.length !== 6) { setError('Pincode must be 6 digits'); return; }
+              if (addr.phone.length !== 10) { setError('Phone number must be 10 digits'); return; }
+              if (addr.pincode && addr.pincode.length !== 6) { setError('Pincode must be 6 digits'); return; }
               setError('');
               setStep(2);
             }}>Continue to Review →</button>
@@ -210,7 +213,8 @@ function Checkout({ token, cart, setCart }) {
             </div>
             <div className="checkout-addr-summary">
               <h4>Delivering to:</h4>
-              <p>{(selectedAddr || newAddr).street}, {(selectedAddr || newAddr).city}, {(selectedAddr || newAddr).state} - {(selectedAddr || newAddr).pincode}</p>
+              <p><strong>{(selectedAddr || newAddr).fullName}</strong> | 📞 {(selectedAddr || newAddr).phone}</p>
+              <p>{(selectedAddr || newAddr).addressLine1}, {(selectedAddr || newAddr).city}, {(selectedAddr || newAddr).state} - {(selectedAddr || newAddr).pincode}</p>
             </div>
             <div className="checkout-nav-btns">
               <button className="checkout-back-btn" onClick={() => setStep(1)}>← Back to Address</button>

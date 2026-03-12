@@ -30,7 +30,7 @@ const productSchema = new mongoose.Schema(
             type: String,
             required: true,
             enum: [
-                'kurtas', 'shirts', 'pants', 'sherwanis', 'lungis', 'jeans',
+                'kurtas', 'shirts', 't-shirts', 'pants', 'sherwanis', 'blazers', 'lungis', 'jeans',
                 'sarees', 'lehengas', 'salwar-suits', 'kurtis', 'dupattas', 'blouses',
                 'kids-ethnic', 'kids-casual', 'kids-frocks', 'kids-sets',
                 'footwear', 'jewellery', 'accessories',

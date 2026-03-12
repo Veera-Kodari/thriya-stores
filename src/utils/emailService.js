@@ -108,14 +108,9 @@ const sendOTPEmail = async (to, otp, purpose = 'registration', userName = '') =>
         html: otpEmailTemplate(otp, purpose, userName),
     };
 
-    try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`📧 OTP email sent to ${to} (${purpose}) — MessageId: ${info.messageId}`);
-        return { success: true, messageId: info.messageId };
-    } catch (error) {
-        console.error(`❌ Failed to send OTP email to ${to}:`, error.message);
-        return { success: false, error: error.message };
-    }
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`📧 OTP email sent to ${to} (${purpose}) — MessageId: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
 };
 
 /**
@@ -198,6 +193,7 @@ const sendOrderEmail = async (to, order, userName = '') => {
         return { success: true, messageId: info.messageId };
     } catch (error) {
         console.error(`❌ Order email failed for ${to}:`, error.message);
+        // Don't throw — order is already placed, email is best-effort
         return { success: false, error: error.message };
     }
 };

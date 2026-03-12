@@ -261,7 +261,7 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
           <div className="footer-col">
             <h4>Follow Us</h4>
             <div className="social-links">
-              <span>📷 Instagram</span>
+              <a href="https://www.instagram.com/thriya_by_sandhya?igsh=MTF1ZmtqeGRoaTBn" target="_blank" rel="noopener noreferrer">📷 Instagram</a>
               <span>🐦 Twitter</span>
               <span>📘 Facebook</span>
             </div>

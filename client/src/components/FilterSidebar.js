@@ -7,6 +7,8 @@ const subcategoryLabels = {
   sherwanis: '🤵 Sherwanis',
   lungis: '🩱 Lungis & Dhotis',
   jeans: '👖 Jeans',
+  't-shirts': '👕 T-Shirts',
+  blazers: '🧥 Blazers',
   sarees: '🥻 Sarees',
   lehengas: '👗 Lehengas',
   'salwar-suits': '👘 Salwar Suits',

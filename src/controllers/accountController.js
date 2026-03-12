@@ -146,8 +146,11 @@ const placeOrder = async (req, res) => {
         if (!items || items.length === 0) {
             return res.status(400).json({ error: 'No items in order' });
         }
-        if (!shippingAddress || !shippingAddress.fullName) {
-            return res.status(400).json({ error: 'Shipping address is required' });
+        if (!shippingAddress || !shippingAddress.addressLine1 || !shippingAddress.city || !shippingAddress.state || !shippingAddress.pincode) {
+            return res.status(400).json({ error: 'Complete shipping address is required' });
+        }
+        if (!shippingAddress.phone) {
+            return res.status(400).json({ error: 'Phone number is required for delivery' });
         }
         const order = await Order.create({
             user: req.userId,

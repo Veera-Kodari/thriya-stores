@@ -15,6 +15,8 @@ const fallbackImages = {
   pants: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=520&fit=crop',
   jeans: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=520&fit=crop',
   lungis: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=520&fit=crop',
+  't-shirts': 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=520&fit=crop',
+  blazers: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&h=520&fit=crop',
   footwear: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=520&fit=crop',
   jewellery: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=520&fit=crop',
   accessories: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&h=520&fit=crop',
