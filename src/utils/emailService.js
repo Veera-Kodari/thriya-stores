@@ -9,14 +9,18 @@ if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
 }
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.SMTP_EMAIL || '',
         pass: process.env.SMTP_PASSWORD || '',
     },
-    connectionTimeout: 10000, // 10s to connect
-    greetingTimeout: 10000,   // 10s for greeting
-    socketTimeout: 15000,     // 15s socket idle
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    dnsTimeout: 10000,
+    family: 4, // Force IPv4 — Render doesn't support IPv6
 });
 
 // Verify connection on startup
