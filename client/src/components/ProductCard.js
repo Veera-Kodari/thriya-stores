@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Fallback image by subcategory
 const fallbackImages = {
@@ -26,6 +27,7 @@ const fallbackImages = {
 const defaultFallback = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=520&fit=crop';
 
 function ProductCard({ product, onAddToCart, onUpdateQty, onRemoveFromCart, cartQty = 0, isWishlisted, onToggleWishlist }) {
+  const navigate = useNavigate();
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -38,7 +40,7 @@ function ProductCard({ product, onAddToCart, onUpdateQty, onRemoveFromCart, cart
     : product.image;
 
   return (
-    <div className={`product-card ${!product.inStock ? 'out-of-stock' : ''}`}>
+    <div className={`product-card ${!product.inStock ? 'out-of-stock' : ''}`} onClick={() => navigate(`/product/${product._id}`)} style={{cursor:'pointer'}}>
       {/* Image Container */}
       <div className="product-img-container">
         {!imgLoaded && <div className="img-placeholder"></div>}
@@ -105,14 +107,14 @@ function ProductCard({ product, onAddToCart, onUpdateQty, onRemoveFromCart, cart
           {!product.inStock ? (
             <span className="oos-label">Currently Unavailable</span>
           ) : cartQty > 0 ? (
-            <div className="card-qty-controls">
+            <div className="card-qty-controls" onClick={e => e.stopPropagation()}>
               <button className="qty-btn" onClick={() => onUpdateQty(product._id, cartQty - 1)}>−</button>
               <span className="qty-value">{cartQty}</span>
               <button className="qty-btn" onClick={() => onUpdateQty(product._id, cartQty + 1)}>+</button>
               <button className="qty-remove" onClick={() => onRemoveFromCart(product._id)}>Remove</button>
             </div>
           ) : (
-            <button className="add-cart-btn" onClick={() => onAddToCart(product)}>
+            <button className="add-cart-btn" onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}>
               Add
             </button>
           )}

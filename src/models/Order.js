@@ -28,16 +28,28 @@ const orderSchema = new mongoose.Schema(
             enum: ['placed', 'confirmed', 'shipped', 'delivered', 'cancelled'],
             default: 'placed',
         },
-        paymentMethod: { type: String, default: 'COD' },
+        statusHistory: [
+            {
+                status: String,
+                timestamp: { type: Date, default: Date.now },
+                note: { type: String, default: '' },
+            },
+        ],
+        paymentMethod: { type: String, enum: ['COD', 'online'], default: 'COD' },
+        paymentId: { type: String, default: '' },
+        paymentStatus: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending' },
         orderNumber: { type: String, unique: true },
     },
     { timestamps: true }
 );
 
-// Auto-generate order number
+// Auto-generate order number + initial status history
 orderSchema.pre('save', function () {
     if (!this.orderNumber) {
         this.orderNumber = 'TS' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
+    }
+    if (this.isNew && this.statusHistory.length === 0) {
+        this.statusHistory.push({ status: 'placed', note: 'Order placed successfully' });
     }
 });
 

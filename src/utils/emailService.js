@@ -118,4 +118,88 @@ const sendOTPEmail = async (to, otp, purpose = 'registration', userName = '') =>
     }
 };
 
-module.exports = { sendOTPEmail };
+/**
+ * Send Order Confirmation Email
+ */
+const orderEmailTemplate = (order, userName) => {
+    const itemsHtml = order.items.map((item) => `
+        <tr>
+            <td style="padding: 12px 0; border-bottom: 1px solid #eee;">
+                <span style="color: #222; font-weight: 500;">${item.name}</span>
+                ${item.size ? `<br><span style="color: #888; font-size: 12px;">Size: ${item.size}</span>` : ''}
+            </td>
+            <td style="padding: 12px 0; border-bottom: 1px solid #eee; text-align: center; color: #666;">${item.qty}</td>
+            <td style="padding: 12px 0; border-bottom: 1px solid #eee; text-align: right; color: #222; font-weight: 500;">₹${(item.price * item.qty).toLocaleString('en-IN')}</td>
+        </tr>
+    `).join('');
+
+    const addr = order.shippingAddress;
+    return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 0;">
+        <tr><td align="center">
+            <table width="500" cellpadding="0" cellspacing="0" style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+                <tr><td style="background: #222; padding: 24px 32px; text-align: center;">
+                    <h1 style="margin: 0; color: #fff; font-size: 20px; letter-spacing: 3px; text-transform: uppercase;">Thriya Stores</h1>
+                </td></tr>
+                <tr><td style="padding: 32px;">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <span style="font-size: 40px;">✅</span>
+                        <h2 style="margin: 8px 0 4px; color: #222; font-size: 20px;">Order Confirmed!</h2>
+                        <p style="margin: 0; color: #888; font-size: 14px;">Hi ${userName || 'there'}, your order has been placed successfully.</p>
+                    </div>
+                    <div style="background: #f9f9f9; border-radius: 6px; padding: 16px; margin-bottom: 20px;">
+                        <p style="margin: 0 0 4px; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Order Number</p>
+                        <p style="margin: 0; color: #222; font-size: 18px; font-weight: 700; letter-spacing: 1px;">#${order.orderNumber}</p>
+                    </div>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
+                        <tr style="border-bottom: 2px solid #222;">
+                            <td style="padding: 8px 0; font-weight: 600; color: #222; font-size: 13px;">Item</td>
+                            <td style="padding: 8px 0; font-weight: 600; color: #222; font-size: 13px; text-align: center;">Qty</td>
+                            <td style="padding: 8px 0; font-weight: 600; color: #222; font-size: 13px; text-align: right;">Amount</td>
+                        </tr>
+                        ${itemsHtml}
+                        <tr>
+                            <td colspan="2" style="padding: 14px 0 0; font-weight: 700; color: #222; font-size: 15px;">Total</td>
+                            <td style="padding: 14px 0 0; font-weight: 700; color: #222; font-size: 15px; text-align: right;">₹${order.totalAmount.toLocaleString('en-IN')}</td>
+                        </tr>
+                    </table>
+                    <div style="background: #f9f9f9; border-radius: 6px; padding: 16px; margin-bottom: 16px;">
+                        <p style="margin: 0 0 4px; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Delivery Address</p>
+                        <p style="margin: 0; color: #222; font-size: 14px; line-height: 1.5;">
+                            ${addr.fullName}<br>${addr.addressLine1}${addr.addressLine2 ? ', ' + addr.addressLine2 : ''}<br>${addr.city}, ${addr.state} - ${addr.pincode}<br>Phone: ${addr.phone}
+                        </p>
+                    </div>
+                    <p style="margin: 0; color: #888; font-size: 13px; text-align: center;">Payment: <strong>${order.paymentMethod === 'COD' ? 'Cash on Delivery' : 'Paid Online'}</strong></p>
+                </td></tr>
+                <tr><td style="padding: 20px 32px; border-top: 1px solid #eee; text-align: center;">
+                    <p style="margin: 0; color: #bbb; font-size: 11px;">&copy; ${new Date().getFullYear()} Thriya Stores &mdash; Traditional Indian Wear</p>
+                </td></tr>
+            </table>
+        </td></tr>
+    </table>
+</body>
+</html>`;
+};
+
+const sendOrderEmail = async (to, order, userName = '') => {
+    const mailOptions = {
+        from: `"Thriya Stores" <${process.env.SMTP_EMAIL}>`,
+        to,
+        subject: `Order Confirmed! #${order.orderNumber} — Thriya Stores`,
+        html: orderEmailTemplate(order, userName),
+    };
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`📧 Order confirmation sent to ${to} — #${order.orderNumber}`);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error(`❌ Order email failed for ${to}:`, error.message);
+        return { success: false, error: error.message };
+    }
+};
+
+module.exports = { sendOTPEmail, sendOrderEmail };

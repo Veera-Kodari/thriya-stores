@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Review = require('../models/Review');
 
 // GET /api/products — list with filters, search, sort, pagination
 const getProducts = async (req, res) => {
@@ -40,36 +41,20 @@ const getProducts = async (req, res) => {
             ];
         }
 
-        // Sort options
         let sortOption = { createdAt: -1 };
         switch (sort) {
-            case 'price-low':
-                sortOption = { price: 1 };
-                break;
-            case 'price-high':
-                sortOption = { price: -1 };
-                break;
-            case 'rating':
-                sortOption = { rating: -1 };
-                break;
-            case 'newest':
-                sortOption = { createdAt: -1 };
-                break;
-            case 'name-az':
-                sortOption = { name: 1 };
-                break;
-            case 'name-za':
-                sortOption = { name: -1 };
-                break;
+            case 'price-low': sortOption = { price: 1 }; break;
+            case 'price-high': sortOption = { price: -1 }; break;
+            case 'rating': sortOption = { rating: -1 }; break;
+            case 'newest': sortOption = { createdAt: -1 }; break;
+            case 'name-az': sortOption = { name: 1 }; break;
+            case 'name-za': sortOption = { name: -1 }; break;
         }
 
         const skip = (Number(page) - 1) * Number(limit);
 
         const [products, total] = await Promise.all([
-            Product.find(filter)
-                .sort(sortOption)
-                .skip(skip)
-                .limit(Number(limit)),
+            Product.find(filter).sort(sortOption).skip(skip).limit(Number(limit)),
             Product.countDocuments(filter),
         ]);
 
@@ -85,7 +70,7 @@ const getProducts = async (req, res) => {
     }
 };
 
-// GET /api/products/filters — get available filter options
+// GET /api/products/filters
 const getFilterOptions = async (req, res) => {
     try {
         const { category } = req.query;
@@ -96,13 +81,7 @@ const getFilterOptions = async (req, res) => {
             Product.distinct('subcategory', filter),
             Product.aggregate([
                 { $match: filter },
-                {
-                    $group: {
-                        _id: null,
-                        minPrice: { $min: '$price' },
-                        maxPrice: { $max: '$price' },
-                    },
-                },
+                { $group: { _id: null, minPrice: { $min: '$price' }, maxPrice: { $max: '$price' } } },
             ]),
         ]);
 
@@ -112,8 +91,27 @@ const getFilterOptions = async (req, res) => {
             priceRange: priceRange[0] || { minPrice: 0, maxPrice: 1000 },
         });
     } catch (error) {
-        console.error('getFilterOptions error:', error);
         res.status(500).json({ error: 'Failed to fetch filter options' });
+    }
+};
+
+// GET /api/products/search-suggestions?q=
+const searchSuggestions = async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q || q.length < 2) return res.json({ products: [], brands: [] });
+
+        const [products, brands] = await Promise.all([
+            Product.find(
+                { name: { $regex: q, $options: 'i' } },
+                { name: 1, brand: 1, price: 1, image: 1, subcategory: 1 }
+            ).limit(6),
+            Product.distinct('brand', { brand: { $regex: q, $options: 'i' } }),
+        ]);
+
+        res.json({ products, brands: brands.slice(0, 5) });
+    } catch (error) {
+        res.status(500).json({ error: 'Search failed' });
     }
 };
 
@@ -121,14 +119,75 @@ const getFilterOptions = async (req, res) => {
 const getProduct = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
+        if (!product) return res.status(404).json({ error: 'Product not found' });
         res.json(product);
     } catch (error) {
-        console.error('getProduct error:', error);
         res.status(500).json({ error: 'Failed to fetch product' });
     }
 };
 
-module.exports = { getProducts, getFilterOptions, getProduct };
+// GET /api/products/:id/reviews
+const getProductReviews = async (req, res) => {
+    try {
+        const reviews = await Review.find({ product: req.params.id })
+            .populate('user', 'name profilePic')
+            .sort({ createdAt: -1 });
+        res.json(reviews);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch reviews' });
+    }
+};
+
+// POST /api/products/:id/reviews (auth required)
+const addReview = async (req, res) => {
+    try {
+        const { rating, title, comment } = req.body;
+        if (!rating || rating < 1 || rating > 5) {
+            return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+        }
+
+        const existing = await Review.findOne({ product: req.params.id, user: req.userId });
+        if (existing) {
+            existing.rating = rating;
+            existing.title = title || '';
+            existing.comment = comment || '';
+            await existing.save();
+            const populated = await existing.populate('user', 'name profilePic');
+            return res.json(populated);
+        }
+
+        const review = await Review.create({
+            product: req.params.id,
+            user: req.userId,
+            rating,
+            title: title || '',
+            comment: comment || '',
+        });
+        const populated = await review.populate('user', 'name profilePic');
+        res.status(201).json(populated);
+    } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ error: 'You already reviewed this product' });
+        }
+        res.status(500).json({ error: 'Failed to add review' });
+    }
+};
+
+// GET /api/products/:id/related
+const getRelatedProducts = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ error: 'Product not found' });
+
+        const related = await Product.find({
+            _id: { $ne: product._id },
+            $or: [{ subcategory: product.subcategory }, { brand: product.brand }],
+        }).limit(8);
+
+        res.json(related);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch related products' });
+    }
+};
+
+module.exports = { getProducts, getFilterOptions, getProduct, searchSuggestions, getProductReviews, addReview, getRelatedProducts };

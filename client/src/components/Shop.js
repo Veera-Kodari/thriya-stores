@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { getProducts, getFilterOptions } from '../services/api';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { getProducts, getFilterOptions, getSearchSuggestions } from '../services/api';
 import ProductCard from './ProductCard';
 import FilterSidebar from './FilterSidebar';
 
-function Shop({ user, token, onLogout, onViewCart, cartCount, onNavigate, wishlistIds, onToggleWishlist }) {
+function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist, cart: cartProp, addToCart: addToCartProp, updateQty: updateQtyProp, removeFromCart: removeFromCartProp }) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -11,12 +14,24 @@ function Shop({ user, token, onLogout, onViewCart, cartCount, onNavigate, wishli
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [cart, setCart] = useState(() => {
+    if (cartProp) return cartProp;
     const saved = localStorage.getItem('cart');
     return saved ? JSON.parse(saved) : [];
   });
+  // Search autocomplete
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestRef = useRef(null);
+  const suggestTimer = useRef(null);
+
+  // Sync cart from props
+  useEffect(() => { if (cartProp) setCart(cartProp); }, [cartProp]);
+
+  // Init category from URL params
+  const urlCategory = searchParams.get('category');
 
   // Filters state
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory, setActiveCategory] = useState(urlCategory || 'all');
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [sort, setSort] = useState('newest');
@@ -81,9 +96,36 @@ function Shop({ user, token, onLogout, onViewCart, cartCount, onNavigate, wishli
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (suggestRef.current && !suggestRef.current.contains(e.target)) setShowSuggestions(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const fetchSuggestions = async (query) => {
+    if (query.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
+    try {
+      const data = await getSearchSuggestions(query);
+      if (data.products || data.brands) {
+        setSuggestions([...(data.products || []).slice(0,5), ...(data.brands || []).map(b => ({ _type: 'brand', name: b }))]);
+        setShowSuggestions(true);
+      }
+    } catch(e) {}
+  };
+
+  const handleSearchInputChange = (val) => {
+    setSearchInput(val);
+    clearTimeout(suggestTimer.current);
+    suggestTimer.current = setTimeout(() => fetchSuggestions(val), 300);
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     setSearch(searchInput);
+    setShowSuggestions(false);
     setPage(1);
   };
 
@@ -104,28 +146,22 @@ function Shop({ user, token, onLogout, onViewCart, cartCount, onNavigate, wishli
     setPage(1);
   };
 
-  const addToCart = (product) => {
+  const addToCart = addToCartProp || ((product) => {
     setCart((prev) => {
       const exists = prev.find((item) => item._id === product._id);
-      if (exists) {
-        return prev.map((item) =>
-          item._id === product._id ? { ...item, qty: item.qty + 1 } : item
-        );
-      }
+      if (exists) return prev.map((item) => item._id === product._id ? { ...item, qty: item.qty + 1 } : item);
       return [...prev, { ...product, qty: 1 }];
     });
-  };
+  });
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = removeFromCartProp || ((productId) => {
     setCart((prev) => prev.filter((item) => item._id !== productId));
-  };
+  });
 
-  const updateQty = (productId, qty) => {
+  const updateQty = updateQtyProp || ((productId, qty) => {
     if (qty < 1) return removeFromCart(productId);
-    setCart((prev) =>
-      prev.map((item) => (item._id === productId ? { ...item, qty } : item))
-    );
-  };
+    setCart((prev) => prev.map((item) => (item._id === productId ? { ...item, qty } : item)));
+  });
 
   const totalCartItems = cart.reduce((sum, item) => sum + item.qty, 0);
   const totalCartPrice = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -141,31 +177,50 @@ function Shop({ user, token, onLogout, onViewCart, cartCount, onNavigate, wishli
       {/* Top Navigation Bar */}
       <nav className="shop-nav">
         <div className="nav-left">
-          <h1 className="shop-logo">ThriyaStore</h1>
+          <div className="brand-logo" onClick={() => navigate('/')} style={{cursor:'pointer'}}>
+            <span className="brand-mark">T</span>
+            <span className="brand-text">THRIYA</span>
+          </div>
         </div>
-        <div className="nav-center">
+        <div className="nav-center" ref={suggestRef}>
           <form className="search-form" onSubmit={handleSearch}>
             <span className="search-icon">🔍</span>
             <input
               type="text"
               placeholder="Search products, brands..."
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={(e) => handleSearchInputChange(e.target.value)}
+              onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
               className="search-input"
             />
             {searchInput && (
-              <button type="button" className="search-clear" onClick={() => { setSearchInput(''); setSearch(''); setPage(1); }}>
+              <button type="button" className="search-clear" onClick={() => { setSearchInput(''); setSearch(''); setSuggestions([]); setShowSuggestions(false); setPage(1); }}>
                 ✕
               </button>
             )}
           </form>
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="search-suggestions">
+              {suggestions.map((s, i) => s._type === 'brand' ? (
+                <button key={'b'+i} className="suggestion-item brand" onClick={() => { setSearchInput(s.name); setSearch(s.name); setShowSuggestions(false); setPage(1); }}>
+                  <span className="sug-icon">🏷️</span> {s.name}
+                  <span className="sug-type">Brand</span>
+                </button>
+              ) : (
+                <button key={s._id} className="suggestion-item" onClick={() => { setShowSuggestions(false); navigate(`/product/${s._id}`); }}>
+                  <img src={s.image} alt="" className="sug-img" onError={e => { e.target.style.display = 'none'; }} />
+                  <div className="sug-info"><span className="sug-name">{s.name}</span><span className="sug-price">₹{s.price?.toLocaleString('en-IN')}</span></div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div className="nav-right">
           <button className="nav-icon-btn" title="Wishlist" onClick={() => onNavigate && onNavigate('account-wishlist')}>
             ♡
             {wishlistIds && wishlistIds.length > 0 && <span className="nav-badge">{wishlistIds.length}</span>}
           </button>
-          <button className="nav-icon-btn" title="My Account" onClick={() => onNavigate && onNavigate('account')}>
+          <button className="nav-icon-btn" title="My Account" onClick={() => navigate('/account')}>
             👤
           </button>
           <button className="cart-btn" onClick={() => setShowCart(!showCart)}>
@@ -357,7 +412,7 @@ function Shop({ user, token, onLogout, onViewCart, cartCount, onNavigate, wishli
                     <span>Total</span>
                     <span className="cart-total-price">₹{totalCartPrice.toLocaleString('en-IN')}</span>
                   </div>
-                  <button className="checkout-btn">Proceed to Checkout</button>
+                  <button className="checkout-btn" onClick={() => { setShowCart(false); navigate('/checkout'); }}>Proceed to Checkout</button>
                 </div>
               </>
             )}

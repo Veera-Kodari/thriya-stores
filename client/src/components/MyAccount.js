@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   getProfile,
   updateProfile,
@@ -84,7 +85,10 @@ const TABS = [
 ];
 
 function MyAccount({ token, user, onBack, onAddToCart, defaultTab }) {
-  const [activeTab, setActiveTab] = useState(defaultTab || 'profile');
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(urlTab || defaultTab || 'profile');
   const [profile, setProfile] = useState(null);
   const [orders, setOrders] = useState([]);
   const [wishlist, setWishlist] = useState([]);
@@ -280,8 +284,9 @@ function MyAccount({ token, user, onBack, onAddToCart, defaultTab }) {
     <div className="account-page">
       {/* Header */}
       <div className="account-header">
-        <button className="account-back" onClick={onBack}>← Back to Shop</button>
+        <button className="account-back" onClick={() => navigate('/')}>← Back to Home</button>
         <h2>My Account</h2>
+        {user?.role === 'admin' && <button className="admin-link-btn" onClick={() => navigate('/admin')}>🔐 Admin Panel</button>}
       </div>
 
       {msg && <div className="account-msg">{msg}</div>}
@@ -442,9 +447,12 @@ function MyAccount({ token, user, onBack, onAddToCart, defaultTab }) {
                           </div>
                           <div className="order-bottom">
                             <span className="order-total">Total: ₹{order.totalAmount?.toLocaleString('en-IN')}</span>
-                            {!['delivered', 'cancelled'].includes(order.status) && (
-                              <button className="cancel-order-btn" onClick={() => handleCancelOrder(order._id)}>Cancel Order</button>
-                            )}
+                            <div className="order-actions">
+                              <button className="track-order-btn" onClick={() => navigate(`/account/orders/${order._id}`)}>Track Order →</button>
+                              {!['delivered', 'cancelled'].includes(order.status) && (
+                                <button className="cancel-order-btn" onClick={() => handleCancelOrder(order._id)}>Cancel</button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}

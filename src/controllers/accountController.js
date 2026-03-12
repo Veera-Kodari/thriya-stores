@@ -5,6 +5,7 @@
 
 const User = require('../models/User');
 const Order = require('../models/Order');
+const { sendOrderEmail } = require('../utils/emailService');
 
 // ─── PROFILE ──────────────────────────────────────────
 const getProfile = async (req, res) => {
@@ -141,9 +142,12 @@ const getOrders = async (req, res) => {
 
 const placeOrder = async (req, res) => {
     try {
-        const { items, shippingAddress, totalAmount, paymentMethod } = req.body;
+        const { items, shippingAddress, totalAmount, paymentMethod, paymentId } = req.body;
         if (!items || items.length === 0) {
             return res.status(400).json({ error: 'No items in order' });
+        }
+        if (!shippingAddress || !shippingAddress.fullName) {
+            return res.status(400).json({ error: 'Shipping address is required' });
         }
         const order = await Order.create({
             user: req.userId,
@@ -151,9 +155,21 @@ const placeOrder = async (req, res) => {
             shippingAddress,
             totalAmount,
             paymentMethod: paymentMethod || 'COD',
+            paymentId: paymentId || '',
+            paymentStatus: paymentMethod === 'online' ? 'paid' : 'pending',
         });
+
+        // Send order confirmation email (non-blocking)
+        const user = await User.findById(req.userId);
+        if (user && user.email) {
+            sendOrderEmail(user.email, order, user.name).catch((err) =>
+                console.error('Order email failed:', err.message)
+            );
+        }
+
         res.status(201).json(order);
     } catch (err) {
+        console.error('placeOrder error:', err);
         res.status(500).json({ error: 'Failed to place order' });
     }
 };
