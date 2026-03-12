@@ -4,12 +4,19 @@
 
 const nodemailer = require('nodemailer');
 
+if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
+    console.error('WARNING: SMTP_EMAIL or SMTP_PASSWORD not set! Email sending will fail.');
+}
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: process.env.SMTP_EMAIL,
-        pass: process.env.SMTP_PASSWORD,
+        user: process.env.SMTP_EMAIL || '',
+        pass: process.env.SMTP_PASSWORD || '',
     },
+    connectionTimeout: 10000, // 10s to connect
+    greetingTimeout: 10000,   // 10s for greeting
+    socketTimeout: 15000,     // 15s socket idle
 });
 
 // Verify connection on startup
@@ -97,6 +104,10 @@ const otpEmailTemplate = (otp, purpose, userName) => {
  * @param {string} userName - Optional user name for greeting
  */
 const sendOTPEmail = async (to, otp, purpose = 'registration', userName = '') => {
+    if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
+        throw new Error('Email service not configured (SMTP_EMAIL/SMTP_PASSWORD missing)');
+    }
+
     const subject = purpose === 'registration'
         ? `${otp} is your Thriya Stores verification code`
         : `${otp} is your Thriya Stores password reset code`;
