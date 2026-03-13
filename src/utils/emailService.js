@@ -1,38 +1,16 @@
 /**
- * Email Service — Sends OTP emails via Gmail SMTP using Nodemailer
+ * Email Service — Sends emails via Resend HTTP API
+ * Uses Resend instead of SMTP because Render's free tier blocks SMTP ports 465/587
  */
 
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
-    console.error('WARNING: SMTP_EMAIL or SMTP_PASSWORD not set in env, using defaults.');
-}
+const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_GdVNAj1H_MwkGDBAbM2rUMGxFBLwbV7km';
+const FROM_EMAIL = 'Thriya Stores <onboarding@resend.dev>';
 
-const SMTP_USER = process.env.SMTP_EMAIL || 'kalyankodari6@gmail.com';
-const SMTP_PASS = process.env.SMTP_PASSWORD || 'weqw zueb pnwv bqzr';
+const resend = new Resend(RESEND_API_KEY);
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: {
-        user: SMTP_USER,
-        pass: SMTP_PASS,
-    },
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 20000,
-    dnsTimeout: 10000,
-    family: 4, // Force IPv4 — Render doesn't support IPv6
-    tls: {
-        rejectUnauthorized: false,
-    },
-});
-
-// Verify connection on startup
-transporter.verify()
-    .then(() => console.log('✉️  Email service ready (Gmail SMTP)'))
-    .catch((err) => console.error('❌ Email service error:', err.message));
+console.log('✉️  Email service ready (Resend HTTP API)');
 
 /**
  * Generate a styled HTML email for OTP
@@ -118,16 +96,20 @@ const sendOTPEmail = async (to, otp, purpose = 'registration', userName = '') =>
         ? `${otp} is your Thriya Stores verification code`
         : `${otp} is your Thriya Stores password reset code`;
 
-    const mailOptions = {
-        from: `"Thriya Stores" <${SMTP_USER}>`,
-        to,
+    const { data, error } = await resend.emails.send({
+        from: FROM_EMAIL,
+        to: [to],
         subject,
         html: otpEmailTemplate(otp, purpose, userName),
-    };
+    });
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`📧 OTP email sent to ${to} (${purpose}) — MessageId: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
+    if (error) {
+        console.error(`❌ Resend OTP email error for ${to}:`, error);
+        throw new Error(error.message || 'Failed to send email');
+    }
+
+    console.log(`📧 OTP email sent to ${to} (${purpose}) — Id: ${data.id}`);
+    return { success: true, messageId: data.id };
 };
 
 /**
@@ -198,16 +180,21 @@ const orderEmailTemplate = (order, userName) => {
 };
 
 const sendOrderEmail = async (to, order, userName = '') => {
-    const mailOptions = {
-        from: `"Thriya Stores" <${SMTP_USER}>`,
-        to,
-        subject: `Order Confirmed! #${order.orderNumber} — Thriya Stores`,
-        html: orderEmailTemplate(order, userName),
-    };
     try {
-        const info = await transporter.sendMail(mailOptions);
+        const { data, error } = await resend.emails.send({
+            from: FROM_EMAIL,
+            to: [to],
+            subject: `Order Confirmed! #${order.orderNumber} — Thriya Stores`,
+            html: orderEmailTemplate(order, userName),
+        });
+
+        if (error) {
+            console.error(`❌ Order email failed for ${to}:`, error);
+            return { success: false, error: error.message };
+        }
+
         console.log(`📧 Order confirmation sent to ${to} — #${order.orderNumber}`);
-        return { success: true, messageId: info.messageId };
+        return { success: true, messageId: data.id };
     } catch (error) {
         console.error(`❌ Order email failed for ${to}:`, error.message);
         // Don't throw — order is already placed, email is best-effort

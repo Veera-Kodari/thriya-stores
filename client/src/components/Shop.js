@@ -13,6 +13,7 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
+  const [perPage, setPerPage] = useState(12);
   const [cart, setCart] = useState(() => {
     if (cartProp) return cartProp;
     const saved = localStorage.getItem('cart');
@@ -65,7 +66,7 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
     setLoading(true);
     setError('');
     try {
-      const params = { page, limit: 12, sort };
+      const params = { page, limit: perPage, sort };
       if (activeCategory !== 'all') params.category = activeCategory;
       if (search) params.search = search;
       if (selectedSubcategory) params.subcategory = selectedSubcategory;
@@ -85,7 +86,12 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
       setError('Failed to load products');
     }
     setLoading(false);
-  }, [page, sort, activeCategory, search, selectedSubcategory, selectedBrand, priceRange, filterOptions.priceRange.maxPrice]);
+  }, [page, perPage, sort, activeCategory, search, selectedSubcategory, selectedBrand, priceRange, filterOptions.priceRange.maxPrice]);
+
+  // Scroll to top on page change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page]);
 
   useEffect(() => {
     fetchProducts();
@@ -287,12 +293,26 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
           {/* Results info bar */}
           <div className="results-bar">
             <span className="results-count">
-              {total} product{total !== 1 ? 's' : ''} found
+              {total > 0 ? (
+                <>Showing {Math.min((page - 1) * perPage + 1, total)}–{Math.min(page * perPage, total)} of {total} product{total !== 1 ? 's' : ''}</>
+              ) : (
+                <>0 products found</>
+              )}
               {search && <span className="results-search"> for "{search}"</span>}
             </span>
-            {hasActiveFilters && (
-              <button className="clear-filters-btn" onClick={clearFilters}>Clear all filters</button>
-            )}
+            <div className="results-bar-right">
+              {hasActiveFilters && (
+                <button className="clear-filters-btn" onClick={clearFilters}>Clear all filters</button>
+              )}
+              <div className="per-page-select">
+                <label>Show:</label>
+                <select value={perPage} onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}>
+                  <option value={12}>12</option>
+                  <option value={24}>24</option>
+                  <option value={48}>48</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           {/* Products Grid */}
@@ -341,35 +361,52 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
           )}
 
           {/* Pagination */}
-          {pages > 1 && (
-            <div className="pagination">
-              <button
-                className="page-btn"
-                disabled={page <= 1}
-                onClick={() => setPage(page - 1)}
-              >
-                ← Prev
-              </button>
-              <div className="page-numbers">
-                {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-                  <button
-                    key={p}
-                    className={`page-num ${p === page ? 'active' : ''}`}
-                    onClick={() => setPage(p)}
-                  >
-                    {p}
-                  </button>
-                ))}
+          {pages > 1 && (() => {
+            const SIBLING = 1;
+            const range = [];
+            const left = Math.max(2, page - SIBLING);
+            const right = Math.min(pages - 1, page + SIBLING);
+
+            range.push(1);
+            if (left > 2) range.push('...');
+            for (let i = left; i <= right; i++) range.push(i);
+            if (right < pages - 1) range.push('...');
+            if (pages > 1) range.push(pages);
+
+            return (
+              <div className="pagination">
+                <button
+                  className="page-btn"
+                  disabled={page <= 1}
+                  onClick={() => setPage(page - 1)}
+                >
+                  ← Prev
+                </button>
+                <div className="page-numbers">
+                  {range.map((p, idx) =>
+                    p === '...' ? (
+                      <span key={`ellipsis-${idx}`} className="page-ellipsis">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        className={`page-num ${p === page ? 'active' : ''}`}
+                        onClick={() => setPage(p)}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+                </div>
+                <button
+                  className="page-btn"
+                  disabled={page >= pages}
+                  onClick={() => setPage(page + 1)}
+                >
+                  Next →
+                </button>
               </div>
-              <button
-                className="page-btn"
-                disabled={page >= pages}
-                onClick={() => setPage(page + 1)}
-              >
-                Next →
-              </button>
-            </div>
-          )}
+            );
+          })()}
         </main>
       </div>
 

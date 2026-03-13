@@ -1696,6 +1696,56 @@ body {
   color: #222;
 }
 
+.page-ellipsis {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 0.9rem;
+  cursor: default;
+  user-select: none;
+}
+
+/* ===== Per Page Selector ===== */
+.results-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.per-page-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.per-page-select label {
+  font-size: 0.78rem;
+  color: #999;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.per-page-select select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #222;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.per-page-select select:hover,
+.per-page-select select:focus {
+  border-color: #222;
+}
+
 /* ===== Cart Drawer ===== */
 .cart-overlay {
   position: fixed;
@@ -2195,6 +2245,20 @@ body {
     width: 30px;
     height: 30px;
     font-size: 0.75rem;
+  }
+
+  .page-ellipsis {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+  }
+
+  .per-page-select {
+    display: none;
+  }
+
+  .results-bar-right {
+    gap: 8px;
   }
 
   /* ── Mobile Loading Skeletons ── */

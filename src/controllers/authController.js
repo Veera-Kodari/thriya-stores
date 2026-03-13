@@ -73,7 +73,7 @@ const sendOTP = async (req, res) => {
             console.error('Failed to send OTP email:', emailErr.message || emailErr);
             // Remove stored OTP since email didn't go through
             otpStore.delete(email.toLowerCase());
-            return res.status(500).json({ error: 'Failed to send OTP email. Please try again later.', detail: emailErr.message });
+            return res.status(500).json({ error: 'Failed to send OTP email. Please try again later.' });
         }
 
         res.json({
