@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getProducts, getFilterOptions, getSearchSuggestions } from '../services/api';
 import ProductCard from './ProductCard';
 import FilterSidebar from './FilterSidebar';
+import { useContent } from '../ContentProvider';
 
 function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist, cart: cartProp, addToCart: addToCartProp, updateQty: updateQtyProp, removeFromCart: removeFromCartProp }) {
   const navigate = useNavigate();
@@ -28,8 +29,9 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
   // Sync cart from props
   useEffect(() => { if (cartProp) setCart(cartProp); }, [cartProp]);
 
-  // Init category from URL params
+  // Init category and maxPrice from URL params
   const urlCategory = searchParams.get('category');
+  const urlMaxPrice = searchParams.get('maxPrice');
 
   // Filters state
   const [activeCategory, setActiveCategory] = useState(urlCategory || 'all');
@@ -38,7 +40,7 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
   const [sort, setSort] = useState('newest');
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('');
-  const [priceRange, setPriceRange] = useState([0, 500]);
+  const [priceRange, setPriceRange] = useState([0, urlMaxPrice ? Number(urlMaxPrice) : 500]);
   const [showFilters, setShowFilters] = useState(false);
 
   // Filter options from API
@@ -72,7 +74,7 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
       if (selectedSubcategory) params.subcategory = selectedSubcategory;
       if (selectedBrand) params.brand = selectedBrand;
       if (priceRange[0] > 0) params.minPrice = priceRange[0];
-      if (priceRange[1] < filterOptions.priceRange.maxPrice) params.maxPrice = priceRange[1];
+      if (priceRange[1] < filterOptions.priceRange.maxPrice || urlMaxPrice) params.maxPrice = urlMaxPrice ? Number(urlMaxPrice) : priceRange[1];
 
       const data = await getProducts(params);
       if (data.error) {
@@ -185,7 +187,7 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
         <div className="nav-left">
           <div className="brand-logo" onClick={() => navigate('/')} style={{cursor:'pointer'}}>
             <span className="brand-mark">T</span>
-            <span className="brand-text">THRIYA</span>
+            <span className="brand-text">{useContent('shop.siteName')}</span>
           </div>
         </div>
         <div className="nav-center" ref={suggestRef}>
@@ -193,7 +195,7 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
             <span className="search-icon">🔍</span>
             <input
               type="text"
-              placeholder="Search products, brands..."
+              placeholder={useContent('shop.searchPlaceholder')}
               value={searchInput}
               onChange={(e) => handleSearchInputChange(e.target.value)}
               onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
@@ -214,7 +216,7 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
                 </button>
               ) : (
                 <button key={s._id} className="suggestion-item" onClick={() => { setShowSuggestions(false); navigate(`/product/${s._id}`); }}>
-                  <img src={s.image} alt="" className="sug-img" onError={e => { e.target.style.display = 'none'; }} />
+                  <img src={s.image} alt="" className="sug-img" style={{ objectFit: 'cover', width: '100%', height: '80px', borderRadius: '6px' }} onError={e => { e.target.style.display = 'none'; }} />
                   <div className="sug-info"><span className="sug-name">{s.name}</span><span className="sug-price">₹{s.price?.toLocaleString('en-IN')}</span></div>
                 </button>
               ))}
@@ -246,7 +248,7 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
               className={`category-tab ${activeCategory === cat ? 'active' : ''}`}
               onClick={() => handleCategoryChange(cat)}
             >
-              {cat === 'all' ? 'All' : cat === 'men' ? 'Men' : cat === 'women' ? 'Women' : 'Kids'}
+              {cat === 'all' ? useContent('shop.shopAll') || 'All' : cat === 'men' ? useContent('shop.shopMen') : cat === 'women' ? useContent('shop.shopWomen') : useContent('shop.shopKids')}
             </button>
           ))}
         </div>
@@ -296,7 +298,7 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
               {total > 0 ? (
                 <>Showing {Math.min((page - 1) * perPage + 1, total)}–{Math.min(page * perPage, total)} of {total} product{total !== 1 ? 's' : ''}</>
               ) : (
-                <>0 products found</>
+                <>{useContent('shop.noProducts')}</>
               )}
               {search && <span className="results-search"> for "{search}"</span>}
             </span>
@@ -429,7 +431,7 @@ function Shop({ user, token, onLogout, onNavigate, wishlistIds, onToggleWishlist
                 <div className="cart-items">
                   {cart.map((item) => (
                     <div key={item._id} className="cart-item">
-                      <img src={item.image} alt={item.name} className="cart-item-img" onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=520&fit=crop'; }} />
+                      <img src={item.image} alt={item.name} className="cart-item-img" style={{ objectFit: 'cover', width: '60px', height: '60px', borderRadius: '6px' }} onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop'; }} />
                       <div className="cart-item-info">
                         <h4>{item.name}</h4>
                         <p className="cart-item-brand">{item.brand}</p>

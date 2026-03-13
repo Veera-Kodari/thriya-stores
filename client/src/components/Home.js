@@ -4,14 +4,6 @@ import { getProducts } from '../services/api';
 
 const heroSlides = [
   {
-    title: '🔥 Fashion Sale is Live',
-    subtitle: 'Up to 60% off on ethnic wear, fusion styles & accessories',
-    cta: 'Shop Now',
-    bg: 'linear-gradient(135deg, #8B0000 0%, #DC143C 50%, #FF4500 100%)',
-    accent: '#FFD700',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=600&fit=crop',
-  },
-  {
     title: 'Ethnic Elegance',
     subtitle: 'Handcrafted sarees, lehengas & more for every occasion',
     cta: 'Shop Women',
@@ -201,7 +193,7 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
         <div className="category-cards">
           {categories.map(cat => (
             <div key={cat.key} className="category-card" onClick={() => navigate(`/shop?category=${cat.key}`)}>
-              <img src={cat.image} alt={cat.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} />
+              <img src={cat.image} alt={cat.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} style={{ objectFit: 'cover', width: '100%', height: '180px', borderRadius: '8px' }} />
               <div className="category-card-overlay">
                 <h3>{cat.name}</h3>
                 <p>{cat.desc}</p>
@@ -223,7 +215,7 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
             {featured.map(p => (
               <div key={p._id} className="home-product-card" onClick={() => navigate(`/product/${p._id}`)}>
                 <div className="hpc-img">
-                  <img src={p.image} alt={p.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} />
+                  <img src={p.image} alt={p.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} style={{ objectFit: 'cover', width: '100%', height: '180px', borderRadius: '8px' }} />
                   {p.originalPrice && (
                     <span className="hpc-badge">-{Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)}%</span>
                   )}
@@ -252,7 +244,7 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
               {featured.slice(0, 3).map(p => (
                 <div key={p._id} className="prebook-card" onClick={() => navigate(`/product/${p._id}`)}>
                   <div className="prebook-img">
-                    <img src={p.image} alt={p.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} />
+                    <img src={p.image} alt={p.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} style={{ objectFit: 'cover', width: '100%', height: '180px', borderRadius: '8px' }} />
                     <span className="prebook-badge">PRE-BOOK</span>
                   </div>
                   <div className="prebook-info">
@@ -277,7 +269,7 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
             {trending.map(p => (
               <div key={p._id} className="home-product-card" onClick={() => navigate(`/product/${p._id}`)}>
                 <div className="hpc-img">
-                  <img src={p.image} alt={p.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} />
+                  <img src={p.image} alt={p.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} style={{ objectFit: 'cover', width: '100%', height: '180px', borderRadius: '8px' }} />
                   <span className="hpc-rating">★ {p.rating}</span>
                 </div>
                 <div className="hpc-info">
@@ -304,7 +296,7 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
           <div className="insta-grid">
             {trending.slice(0, 6).map(p => (
               <div key={p._id} className="insta-card" onClick={() => navigate(`/product/${p._id}`)}>
-                <img src={p.image} alt={p.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} />
+                <img src={p.image} alt={p.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} style={{ objectFit: 'cover', width: '100%', height: '180px', borderRadius: '8px' }} />
                 <div className="insta-overlay">
                   <span>{p.name}</span>
                   <span className="insta-price">₹{p.price.toLocaleString('en-IN')}</span>

@@ -172,21 +172,23 @@ function App() {
 
   // Authenticated routes
   return (
-    <Routes>
-      <Route path="/" element={<Home user={user} token={token} onLogout={handleLogout} wishlistIds={wishlistIds} onToggleWishlist={handleToggleWishlist} onNavigate={handleNavigate} />} />
-      <Route path="/shop" element={<Shop user={user} token={token} onLogout={handleLogout} onNavigate={handleNavigate} wishlistIds={wishlistIds} onToggleWishlist={handleToggleWishlist} cart={cart} addToCart={addToCart} updateQty={updateQty} removeFromCart={removeFromCart} />} />
-      <Route path="/product/:id" element={<ProductDetail token={token} cart={cart} addToCart={addToCart} updateQty={updateQty} removeFromCart={removeFromCart} wishlistIds={wishlistIds} onToggleWishlist={handleToggleWishlist} />} />
-      <Route path="/checkout" element={<Checkout token={token} cart={cart} setCart={setCart} />} />
-      <Route path="/account" element={<MyAccount token={token} user={user} onBack={() => navigate('/')} onAddToCart={addToCart} />} />
-      <Route path="/account/orders/:orderId" element={<OrderDetail token={token} />} />
-      <Route path="/admin" element={<AdminPanel token={token} user={user} />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/cookies" element={<CookiePolicy />} />
-      <Route path="/login" element={<Navigate to="/" replace />} />
-      <Route path="/register" element={<Navigate to="/" replace />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <ContentProvider>
+      <Routes>
+        <Route path="/" element={<Home user={user} token={token} onLogout={handleLogout} wishlistIds={wishlistIds} onToggleWishlist={handleToggleWishlist} onNavigate={handleNavigate} />} />
+        <Route path="/shop" element={<Shop user={user} token={token} onLogout={handleLogout} onNavigate={handleNavigate} wishlistIds={wishlistIds} onToggleWishlist={handleToggleWishlist} cart={cart} addToCart={addToCart} updateQty={updateQty} removeFromCart={removeFromCart} />} />
+        <Route path="/product/:id" element={<ProductDetail token={token} cart={cart} addToCart={addToCart} updateQty={updateQty} removeFromCart={removeFromCart} wishlistIds={wishlistIds} onToggleWishlist={handleToggleWishlist} />} />
+        <Route path="/checkout" element={<Checkout token={token} cart={cart} setCart={setCart} />} />
+        <Route path="/account" element={<MyAccount token={token} user={user} onBack={() => navigate('/')} onAddToCart={addToCart} />} />
+        <Route path="/account/orders/:orderId" element={<OrderDetail token={token} />} />
+        <Route path="/admin" element={<AdminPanel token={token} user={user} />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/cookies" element={<CookiePolicy />} />
+        <Route path="/login" element={<Navigate to="/" replace />} />
+        <Route path="/register" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ContentProvider>
   );
 }
 

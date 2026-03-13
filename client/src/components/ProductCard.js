@@ -3,27 +3,27 @@ import { useNavigate } from 'react-router-dom';
 
 // Fallback image by subcategory
 const fallbackImages = {
-  sarees: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=520&fit=crop',
-  lehengas: 'https://images.unsplash.com/photo-1594463750939-ebb28c3f7f75?w=400&h=520&fit=crop',
-  'salwar-suits': 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400&h=520&fit=crop',
-  kurtis: 'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400&h=520&fit=crop',
-  dupattas: 'https://images.unsplash.com/photo-1614886137299-130f7b108f5c?w=400&h=520&fit=crop',
-  blouses: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400&h=520&fit=crop',
-  kurtas: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=520&fit=crop',
-  sherwanis: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&h=520&fit=crop',
-  shirts: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=520&fit=crop',
-  pants: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=520&fit=crop',
-  jeans: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=520&fit=crop',
-  lungis: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=520&fit=crop',
-  't-shirts': 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=520&fit=crop',
-  blazers: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&h=520&fit=crop',
-  footwear: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=520&fit=crop',
-  jewellery: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=520&fit=crop',
-  accessories: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&h=520&fit=crop',
-  'kids-ethnic': 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400&h=520&fit=crop',
-  'kids-casual': 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400&h=520&fit=crop',
-  'kids-frocks': 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400&h=520&fit=crop',
-  'kids-sets': 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400&h=520&fit=crop',
+  sarees: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  lehengas: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  'salwar-suits': 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  kurtis: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  dupattas: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  blouses: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  kurtas: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  sherwanis: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  shirts: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  pants: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  jeans: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  lungis: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  't-shirts': 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  blazers: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  footwear: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  jewellery: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  accessories: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  'kids-ethnic': 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  'kids-casual': 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  'kids-frocks': 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
+  'kids-sets': 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=520&fit=crop',
 };
 
 const defaultFallback = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=520&fit=crop';
@@ -50,6 +50,7 @@ function ProductCard({ product, onAddToCart, onUpdateQty, onRemoveFromCart, cart
           src={imgSrc}
           alt={product.name}
           className={`product-img ${imgLoaded ? 'loaded' : ''}`}
+          style={{ objectFit: 'cover', width: '100%', height: '240px', borderRadius: '8px' }}
           onLoad={() => setImgLoaded(true)}
           onError={() => { setImgError(true); setImgLoaded(true); }}
           loading="lazy"

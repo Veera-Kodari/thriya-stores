@@ -1,0 +1,37 @@
+{
+  "brand": {
+    "siteName": "Thriya Stores",
+    "tagline": "Traditional Indian Wear",
+    "footer": "Traditional Indian Wear"
+  },
+  "login": {
+    "emailLabel": "Email or Phone Number",
+    "passwordPlaceholder": "Enter your password",
+    "loginButton": "LOGIN",
+    "registerLink": "Register here",
+    "forgotPassword": "Forgot Password?"
+  },
+  "register": {
+    "successTitle": "Registration Successful!",
+    "otpTitle": "Verify Your Email",
+    "resendOtp": "Resend OTP",
+    "fullName": "Full Name",
+    "passwordHint": "Min 8 chars..."
+  },
+  "shop": {
+    "siteName": "THRIYA",
+    "searchPlaceholder": "Search products, brands...",
+    "noProducts": "No products found",
+    "shopWomen": "Shop Women",
+    "shopMen": "Shop Men",
+    "shopKids": "Shop Kids"
+  },
+  "email": {
+    "from": "Thriya Stores <onboarding@resend.dev>",
+    "otpPurposeRegistration": "complete your registration",
+    "otpPurposeReset": "reset your password",
+    "otpTitleRegistration": "Verify Your Email",
+    "otpTitleReset": "Reset Your Password",
+    "otpFooter": "Traditional Indian Wear"
+  }
+}

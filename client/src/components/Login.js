@@ -126,12 +126,12 @@ function Login({ onAuth, onSwitch, onForgotPassword, incomingMessage }) {
       )}
 
       <div className="form-group">
-        <label htmlFor="login-identifier">Email or Phone Number</label>
+        <label htmlFor="login-identifier">{useContent('login.emailLabel')}</label>
         <input
           id="login-identifier"
           type={identifierIsPhone ? 'tel' : 'email'}
           name="identifier"
-          placeholder="you@gmail.com or +91 XXXXX XXXXX"
+          placeholder={useContent('login.emailLabel')}
           value={form.identifier}
           onChange={handleChange}
           className={errors.identifier ? 'input-error' : ''}
@@ -141,13 +141,13 @@ function Login({ onAuth, onSwitch, onForgotPassword, incomingMessage }) {
       </div>
 
       <div className="form-group">
-        <label htmlFor="login-password">Password</label>
+        <label htmlFor="login-password">{useContent('login.passwordPlaceholder')}</label>
         <div className="password-wrapper">
           <input
             id="login-password"
             type={showPassword ? 'text' : 'password'}
             name="password"
-            placeholder="Enter your password"
+            placeholder={useContent('login.passwordPlaceholder')}
             value={form.password}
             onChange={handleChange}
             className={errors.password ? 'input-error' : ''}
@@ -165,17 +165,17 @@ function Login({ onAuth, onSwitch, onForgotPassword, incomingMessage }) {
       </div>
 
       <button type="submit" className="submit-btn" disabled={loading}>
-        {loading ? 'Logging in...' : 'Login'}
+        {loading ? 'Logging in...' : useContent('login.loginButton')}
       </button>
 
       <div className="auth-links">
         <button type="button" className="link-btn" onClick={onForgotPassword}>
-          Forgot Password?
+          {useContent('login.forgotPassword')}
         </button>
         <p className="switch-text">
           Don't have an account?{' '}
           <button type="button" className="link-btn" onClick={onSwitch}>
-            Register here
+            {useContent('login.registerLink')}
           </button>
         </p>
       </div>
