@@ -22,7 +22,7 @@ const fallbackImages = {
 };
 const defaultFallback = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=520&fit=crop';
 
-function ProductDetail({ token, cart, addToCart, updateQty, removeFromCart, wishlistIds, onToggleWishlist }) {
+function ProductDetail({ token, cart, addToCart, updateQty, removeFromCart, wishlistIds, onToggleWishlist, onLogout, onNavigate }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
@@ -146,199 +146,220 @@ function ProductDetail({ token, cart, addToCart, updateQty, removeFromCart, wish
       <div className="pd-content">
         {/* Image Section */}
         <div className="pd-image-section">
-          <div className="pd-main-image">
-            <img
-              src={imgSrc}
-              alt={product.name}
-              onError={() => setImgError(true)}
-            />
-            {discount > 0 && <span className="pd-discount-badge">-{discount}%</span>}
-            {!product.inStock && <div className="pd-oos-overlay">Sold Out</div>}
-          </div>
-          {onToggleWishlist && (
-            <button
-              className={`pd-wishlist-btn ${isWishlisted ? 'active' : ''}`}
-              onClick={() => onToggleWishlist(product._id)}
-            >
-              {isWishlisted ? '❤ Wishlisted' : '♡ Add to Wishlist'}
-            </button>
-          )}
-        </div>
+          return (
+            <div className="pd-page">
+              {/* Nav Bar (copied from Home.js) */}
+              <nav className="home-nav">
+                <div className="nav-left">
+                  <div className="brand-logo" onClick={() => navigate('/')}> <span className="brand-mark">T</span> <span className="brand-text">THRIYA</span> </div>
+                </div>
+                <div className="nav-center home-nav-links">
+                  <button onClick={() => navigate('/shop?category=women')}>Women</button>
+                  <button onClick={() => navigate('/shop?category=men')}>Men</button>
+                  <button onClick={() => navigate('/shop?category=kids')}>Kids</button>
+                  <button onClick={() => navigate('/shop?maxPrice=999')}>999 Store</button>
+                  <button onClick={() => navigate('/shop?sort=price-low')}>Sales & Offers</button>
+                </div>
+                <div className="nav-right">
+                  <button className="nav-brand-link" onClick={() => navigate('/shop')}>Thriya by Sandhya</button>
+                  <button className="nav-icon-btn" title="Search" onClick={() => navigate('/shop')}>🔍</button>
+                  <button className="nav-icon-btn" title="Wishlist" onClick={() => onNavigate?.('account-wishlist')}> ♡ </button>
+                  <button className="nav-icon-btn" title="My Account" onClick={() => navigate('/account')}>👤</button>
+                  <button className="logout-btn-sm" onClick={onLogout}>Logout</button>
+                </div>
+              </nav>
 
-        {/* Info Section */}
-        <div className="pd-info-section">
-          <span className="pd-brand">{product.brand}</span>
-          <h1 className="pd-name">{product.name}</h1>
-
-          {/* Rating */}
-          <div className="pd-rating">
-            <div className="pd-stars">
-              {[1,2,3,4,5].map(s => (
-                <span key={s} className={`pd-star ${s <= Math.round(product.rating) ? 'filled' : ''}`}>★</span>
-              ))}
-            </div>
-            <span className="pd-rating-value">{product.rating}</span>
-            <span className="pd-review-count">({product.reviewCount} reviews)</span>
-          </div>
-
-          {/* Price */}
-          <div className="pd-price-section">
-            <span className="pd-price">₹{product.price.toLocaleString('en-IN')}</span>
-            {product.originalPrice && (
-              <span className="pd-original-price">₹{product.originalPrice.toLocaleString('en-IN')}</span>
-            )}
-            {discount > 0 && <span className="pd-discount-text">{discount}% off</span>}
-          </div>
-
-          <p className="pd-tax-info">Inclusive of all taxes</p>
-
-          {/* Size Selection */}
-          {product.sizes && product.sizes.length > 0 && (
-            <div className="pd-option-section">
-              <h4>Select Size</h4>
-              <div className="pd-size-options">
-                {product.sizes.map(size => (
-                  <button
-                    key={size}
-                    className={`pd-size-btn ${selectedSize === size ? 'active' : ''}`}
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {size}
-                  </button>
-                ))}
+              {/* Breadcrumb */}
+              <div className="pd-breadcrumb">
+                <button onClick={() => navigate('/shop')}>Shop</button>
+                <span>/</span>
+                <span>{product.category?.charAt(0).toUpperCase() + product.category?.slice(1)}</span>
+                <span>/</span>
+                <span>{product.name}</span>
               </div>
-            </div>
-          )}
 
-          {/* Color Selection */}
-          {product.colors && product.colors.length > 0 && (
-            <div className="pd-option-section">
-              <h4>Select Color</h4>
-              <div className="pd-color-options">
-                {product.colors.map(color => (
-                  <button
-                    key={color}
-                    className={`pd-color-btn ${selectedColor === color ? 'active' : ''}`}
-                    onClick={() => setSelectedColor(color)}
-                    title={color}
-                  >
-                    {color}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Add to Cart */}
-          <div className="pd-cart-section">
-            {!product.inStock ? (
-              <button className="pd-cart-btn disabled" disabled>Out of Stock</button>
-            ) : cartItem ? (
-              <div className="pd-qty-controls">
-                <button className="qty-btn" onClick={() => updateQty(product._id, cartItem.qty - 1)}>−</button>
-                <span className="qty-value">{cartItem.qty}</span>
-                <button className="qty-btn" onClick={() => updateQty(product._id, cartItem.qty + 1)}>+</button>
-                <button className="qty-remove" onClick={() => removeFromCart(product._id)}>Remove</button>
-              </div>
-            ) : (
-              <button className="pd-cart-btn" onClick={() => addToCart({ ...product, selectedSize, selectedColor })}>
-                Add to Cart
-              </button>
-            )}
-            <button className="pd-buy-btn" onClick={() => {
-              if (product.inStock && !cartItem) addToCart({ ...product, selectedSize, selectedColor });
-              navigate('/checkout');
-            }} disabled={!product.inStock}>
-              Buy Now
-            </button>
-          </div>
-
-          {/* Description */}
-          <div className="pd-description">
-            <h4>Product Details</h4>
-            <p>{product.description}</p>
-            {product.tags && product.tags.length > 0 && (
-              <div className="pd-tags">
-                {product.tags.map((tag, i) => <span key={i} className="pd-tag">{tag}</span>)}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Reviews Section */}
-      <div className="pd-reviews-section">
-        <div className="pd-reviews-header">
-          <h3>Customer Reviews ({reviews.length})</h3>
-          {token && (
-            <button className="pd-write-review-btn" onClick={() => setShowReviewForm(!showReviewForm)}>
-              {showReviewForm ? 'Cancel' : '✎ Write a Review'}
-            </button>
-          )}
-        </div>
-
-        {reviewMsg && <div className="pd-review-msg">{reviewMsg}</div>}
-
-        {showReviewForm && (
-          <div className="pd-review-form">
-            <div className="pd-review-stars-input">
-              <label>Your Rating:</label>
-              <div className="pd-star-selector">
-                {[1,2,3,4,5].map(s => (
-                  <span
-                    key={s}
-                    className={`pd-star-select ${s <= reviewRating ? 'filled' : ''}`}
-                    onClick={() => setReviewRating(s)}
-                  >★</span>
-                ))}
-              </div>
-            </div>
-            <input
-              type="text"
-              placeholder="Review title (optional)"
-              value={reviewTitle}
-              onChange={e => setReviewTitle(e.target.value)}
-              className="pd-review-input"
-              maxLength={100}
-            />
-            <textarea
-              placeholder="Write your review..."
-              value={reviewComment}
-              onChange={e => setReviewComment(e.target.value)}
-              className="pd-review-textarea"
-              maxLength={1000}
-              rows={4}
-            />
-            <button className="pd-submit-review-btn" onClick={handleAddReview} disabled={reviewLoading}>
-              {reviewLoading ? 'Submitting...' : 'Submit Review'}
-            </button>
-          </div>
-        )}
-
-        {reviews.length === 0 ? (
-          <p className="pd-no-reviews">No reviews yet. Be the first to review!</p>
-        ) : (
-          <div className="pd-reviews-list">
-            {reviews.map(review => (
-              <div key={review._id} className="pd-review-card">
-                <div className="pd-review-top">
-                  <div className="pd-reviewer">
-                    {review.user?.profilePic ? (
-                      <img src={review.user.profilePic} alt="" className="pd-reviewer-pic" />
-                    ) : (
-                      <div className="pd-reviewer-avatar">{review.user?.name?.charAt(0) || '?'}</div>
-                    )}
-                    <span className="pd-reviewer-name">{review.user?.name || 'Anonymous'}</span>
+              <div className="pd-content">
+                {/* Image Section */}
+                <div className="pd-image-section">
+                  <div className="pd-main-image">
+                    <img
+                      src={imgSrc}
+                      alt={product.name}
+                      onError={() => setImgError(true)}
+                    />
+                    {discount > 0 && <span className="pd-discount-badge">-{discount}%</span>}
+                    {!product.inStock && <div className="pd-oos-overlay">Sold Out</div>}
                   </div>
-                  <div className="pd-review-rating">
-                    {[1,2,3,4,5].map(s => (
-                      <span key={s} className={`pd-star-sm ${s <= review.rating ? 'filled' : ''}`}>★</span>
-                    ))}
+                  {onToggleWishlist && (
+                    <button
+                      className={`pd-wishlist-btn ${isWishlisted ? 'active' : ''}`}
+                      onClick={() => onToggleWishlist(product._id)}
+                    >
+                      {isWishlisted ? '❤ Wishlisted' : '♡ Add to Wishlist'}
+                    </button>
+                  )}
+                </div>
+
+                {/* Info Section */}
+                <div className="pd-info-section">
+                  <span className="pd-brand">{product.brand}</span>
+                  <h1 className="pd-name">{product.name}</h1>
+
+                  {/* Rating */}
+                  <div className="pd-rating">
+                    <div className="pd-stars">
+                      {[1,2,3,4,5].map(s => (
+                        <span key={s} className={`pd-star ${s <= Math.round(product.rating) ? 'filled' : ''}`}>★</span>
+                      ))}
+                    </div>
+                    <span className="pd-rating-value">{product.rating}</span>
+                    <span className="pd-review-count">({product.reviewCount} reviews)</span>
+                  </div>
+
+                  {/* Price */}
+                  <div className="pd-price-section">
+                    <span className="pd-price">₹{product.price.toLocaleString('en-IN')}</span>
+                    {product.originalPrice && (
+                      <span className="pd-original-price">₹{product.originalPrice.toLocaleString('en-IN')}</span>
+                    )}
+                    {discount > 0 && <span className="pd-discount-text">{discount}% off</span>}
+                  </div>
+
+                  <p className="pd-tax-info">Inclusive of all taxes</p>
+
+                  {/* Size Selection */}
+                  {product.sizes && product.sizes.length > 0 && (
+                    <div className="pd-option-section">
+                      <h4>Select Size</h4>
+                      <div className="pd-size-options">
+                        {product.sizes.map(size => (
+                          <button
+                            key={size}
+                            className={`pd-size-btn ${selectedSize === size ? 'active' : ''}`}
+                            onClick={() => setSelectedSize(size)}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Color Selection */}
+                  {product.colors && product.colors.length > 0 && (
+                    <div className="pd-option-section">
+                      <h4>Select Color</h4>
+                      <div className="pd-color-options">
+                        {product.colors.map(color => (
+                          <button
+                            key={color}
+                            className={`pd-color-btn ${selectedColor === color ? 'active' : ''}`}
+                            onClick={() => setSelectedColor(color)}
+                            title={color}
+                          >
+                            {color}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Add to Cart */}
+                  <div className="pd-cart-section">
+                    {!product.inStock ? (
+                      <button className="pd-cart-btn disabled" disabled>Out of Stock</button>
+                    ) : cartItem ? (
+                      <div className="pd-qty-controls">
+                        <button className="qty-btn" onClick={() => updateQty(product._id, cartItem.qty - 1)}>−</button>
+                        <span className="qty-value">{cartItem.qty}</span>
+                        <button className="qty-btn" onClick={() => updateQty(product._id, cartItem.qty + 1)}>+</button>
+                        <button className="qty-remove" onClick={() => removeFromCart(product._id)}>Remove</button>
+                      </div>
+                    ) : (
+                      <button className="pd-cart-btn" onClick={() => addToCart({ ...product, selectedSize, selectedColor })}>
+                        Add to Cart
+                      </button>
+                    )}
+                    <button className="pd-buy-btn" onClick={() => {
+                      if (product.inStock && !cartItem) addToCart({ ...product, selectedSize, selectedColor });
+                      navigate('/checkout');
+                    }} disabled={!product.inStock}>
+                      Buy Now
+                    </button>
+                  </div>
+
+                  {/* Description */}
+                  <div className="pd-description">
+                    <h4>Product Details</h4>
+                    <p>{product.description}</p>
+                    {product.tags && product.tags.length > 0 && (
+                      <div className="pd-tags">
+                        {product.tags.map((tag, i) => <span key={i} className="pd-tag">{tag}</span>)}
+                      </div>
+                    )}
                   </div>
                 </div>
-                {review.title && <h5 className="pd-review-title">{review.title}</h5>}
-                {review.comment && <p className="pd-review-comment">{review.comment}</p>}
-                <span className="pd-review-date">{new Date(review.createdAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})}</span>
+              </div>
+
+              {/* Reviews Section */}
+              <div className="pd-reviews-section">
+                <div className="pd-reviews-header">
+                  <h3>Customer Reviews ({reviews.length})</h3>
+                  {token && (
+                    <button className="pd-write-review-btn" onClick={() => setShowReviewForm(!showReviewForm)}>
+                      {showReviewForm ? 'Cancel' : '✎ Write a Review'}
+                    </button>
+                  )}
+                </div>
+
+                {reviewMsg && <div className="pd-review-msg">{reviewMsg}</div>}
+
+                {showReviewForm && (
+                  <div className="pd-review-form">
+                    <div className="pd-review-stars-input">
+                      <label>Your Rating:</label>
+                      <div className="pd-star-selector">
+                        {[1,2,3,4,5].map(s => (
+                          <span
+                            key={s}
+                            className={`pd-star-select ${s <= reviewRating ? 'filled' : ''}`}
+                            onClick={() => setReviewRating(s)}
+                          >★</span>
+                        ))}
+                      </div>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Review title (optional)"
+                      value={reviewTitle}
+                      onChange={e => setReviewTitle(e.target.value)}
+                    />
+                    <textarea
+                      placeholder="Write your review..."
+                      value={reviewComment}
+                      onChange={e => setReviewComment(e.target.value)}
+                    />
+                    <button className="submit-btn" onClick={handleAddReview} disabled={reviewLoading}>
+                      Submit Review
+                    </button>
+                  </div>
+                )}
+
+                {reviews.length === 0 && <div className="pd-no-reviews">No reviews yet.</div>}
+
+                {reviews.map((r, i) => (
+                  <div key={i} className="pd-review">
+                    <div className="pd-review-header">
+                      <span className="pd-review-user">{r.user?.name || 'Anonymous'}</span>
+                      <span className="pd-review-rating">★ {r.rating}</span>
+                      <span className="pd-review-date">{new Date(r.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <h4 className="pd-review-title">{r.title}</h4>
+                    <p className="pd-review-comment">{r.comment}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
               </div>
             ))}
           </div>
