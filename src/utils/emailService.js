@@ -13,17 +13,20 @@ const SMTP_PASS = process.env.SMTP_PASSWORD || 'weqw zueb pnwv bqzr';
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false,
     auth: {
         user: SMTP_USER,
         pass: SMTP_PASS,
     },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
     dnsTimeout: 10000,
     family: 4, // Force IPv4 — Render doesn't support IPv6
+    tls: {
+        rejectUnauthorized: false,
+    },
 });
 
 // Verify connection on startup
