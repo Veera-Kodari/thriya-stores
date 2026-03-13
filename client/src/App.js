@@ -10,6 +10,9 @@ import Checkout from './components/Checkout';
 import MyAccount from './components/MyAccount';
 import OrderDetail from './components/OrderDetail';
 import AdminPanel from './components/AdminPanel';
+import About from './components/About';
+import Terms from './components/Terms';
+import CookiePolicy from './components/CookiePolicy';
 import { getMe, getWishlist, toggleWishlistItem } from './services/api';
 import './App.css';
 
@@ -177,6 +180,9 @@ function App() {
       <Route path="/account" element={<MyAccount token={token} user={user} onBack={() => navigate('/')} onAddToCart={addToCart} />} />
       <Route path="/account/orders/:orderId" element={<OrderDetail token={token} />} />
       <Route path="/admin" element={<AdminPanel token={token} user={user} />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/cookies" element={<CookiePolicy />} />
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/register" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />

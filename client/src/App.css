@@ -3209,6 +3209,103 @@ body {
   color: #1a1a2e;
 }
 
+/* ===== Nav Dropdown / Mega Menu ===== */
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown > button {
+  padding: 20px 0;
+}
+
+.mega-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  border-top: 2px solid #222;
+  padding: 28px 32px;
+  min-width: 380px;
+  z-index: 150;
+  gap: 32px;
+}
+
+.nav-dropdown:hover .mega-menu {
+  display: flex;
+}
+
+.mega-col {
+  min-width: 120px;
+}
+
+.mega-col h5 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #222;
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.mega-col button {
+  display: block;
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 5px 0;
+  font-family: inherit;
+  transition: color 0.2s, padding-left 0.2s;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+.mega-col button:hover {
+  color: #222;
+  padding-left: 4px;
+}
+
+.mega-cta {
+  display: flex;
+  align-items: flex-end;
+}
+
+.mega-shop-all {
+  font-weight: 600 !important;
+  color: #222 !important;
+  font-size: 0.8rem !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  white-space: nowrap;
+}
+
+/* ===== Nav Brand Link ===== */
+.nav-brand-link {
+  background: none;
+  border: none;
+  font-size: 0.7rem;
+  color: #8B4513;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  font-style: italic;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.nav-brand-link:hover {
+  color: #DC143C;
+}
+
 /* Hero */
 .hero-section {
   position: relative;
@@ -3571,6 +3668,317 @@ body {
 
 .promo-cta:hover {
   transform: scale(1.05);
+}
+
+/* ===== Pre-Book Section ===== */
+.prebook-section {
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 50%, #4a1942 100%);
+  padding: 48px 40px;
+  text-align: center;
+}
+
+.prebook-content h2 {
+  font-size: 1.8rem;
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.prebook-content > p {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 28px;
+}
+
+.prebook-cards {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.prebook-card {
+  width: 200px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.prebook-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.prebook-img {
+  position: relative;
+  height: 240px;
+  overflow: hidden;
+}
+
+.prebook-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.prebook-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #FFD700;
+  color: #222;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 3px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.prebook-info {
+  padding: 12px;
+  text-align: left;
+}
+
+.prebook-name {
+  font-size: 0.82rem;
+  color: #222;
+  font-weight: 500;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.prebook-price {
+  font-size: 0.9rem;
+  color: #222;
+  font-weight: 700;
+}
+
+/* ===== Instagram Section ===== */
+.instagram-section .section-link {
+  text-decoration: none;
+  color: #e94560;
+}
+
+.insta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.insta-card {
+  aspect-ratio: 1;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.insta-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+
+.insta-card:hover img {
+  transform: scale(1.08);
+}
+
+.insta-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.insta-card:hover .insta-overlay {
+  opacity: 1;
+}
+
+.insta-overlay span {
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.insta-price {
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  margin-top: 2px;
+}
+
+/* ===== Trust Strip ===== */
+.trust-strip {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  padding: 36px 40px;
+  background: #f8f8f8;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.trust-icon {
+  font-size: 1.4rem;
+}
+
+.trust-item h4 {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #222;
+  letter-spacing: 0.5px;
+}
+
+.trust-item p {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 2px;
+}
+
+/* ===== Floating WhatsApp ===== */
+.whatsapp-float {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  width: 56px;
+  height: 56px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+/* ===== Footer WhatsApp Link ===== */
+.footer-whatsapp {
+  display: block;
+  color: #25D366;
+  font-size: 0.82rem;
+  padding: 4px 0;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-whatsapp:hover {
+  color: #fff;
+}
+
+/* ===== Static Pages ===== */
+.static-page {
+  min-height: 100vh;
+  background: #faf9f7;
+}
+
+.static-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 64px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.static-back {
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  color: #555;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+}
+
+.static-back:hover {
+  color: #222;
+}
+
+.static-content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 40px 64px;
+}
+
+.static-content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.static-updated {
+  font-size: 0.82rem;
+  color: #999;
+  margin-bottom: 32px;
+}
+
+.static-content section {
+  margin-bottom: 32px;
+}
+
+.static-content h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 12px;
+}
+
+.static-content p {
+  font-size: 0.92rem;
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 12px;
+}
+
+.static-content ul {
+  padding-left: 24px;
+  margin-bottom: 12px;
+}
+
+.static-content li {
+  font-size: 0.92rem;
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 4px;
+}
+
+.static-content a {
+  color: #e94560;
+  text-decoration: none;
+}
+
+.static-content a:hover {
+  text-decoration: underline;
 }
 
 /* Footer */
@@ -5389,6 +5797,10 @@ body {
 
   .home-nav-links { display: none; }
 
+  .nav-brand-link { display: none; }
+
+  .mega-menu { display: none !important; }
+
   .hero-content {
     flex-direction: column;
     padding: 32px 20px;
@@ -5421,6 +5833,31 @@ body {
 
   .promo-banner { padding: 32px 16px; }
   .promo-content h2 { font-size: 1.3rem; }
+
+  .prebook-section { padding: 32px 16px; }
+  .prebook-content h2 { font-size: 1.3rem; }
+  .prebook-cards { gap: 16px; }
+  .prebook-card { width: 160px; }
+  .prebook-img { height: 200px; }
+
+  .insta-grid { grid-template-columns: repeat(2, 1fr); gap: 3px; }
+
+  .trust-strip {
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 24px 16px;
+  }
+
+  .whatsapp-float {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .static-nav { padding: 0 16px; }
+  .static-content { padding: 32px 16px 48px; }
+  .static-content h1 { font-size: 1.5rem; }
 
   .footer-grid {
     grid-template-columns: 1fr 1fr;
@@ -5469,6 +5906,14 @@ body {
   .features-strip { gap: 12px; }
   .feature-item h4 { font-size: 0.72rem; }
   .feature-item p { display: none; }
+  .trust-strip { gap: 12px; }
+  .trust-item h4 { font-size: 0.72rem; }
+  .trust-item p { display: none; }
+  .prebook-card { width: 140px; }
+  .prebook-img { height: 170px; }
+  .insta-grid { grid-template-columns: repeat(2, 1fr); }
+  .whatsapp-float { width: 46px; height: 46px; bottom: 16px; right: 16px; }
+  .whatsapp-float svg { width: 22px; height: 22px; }
   .footer-grid { grid-template-columns: 1fr; }
   .success-actions { flex-direction: column; }
   .stats-grid { grid-template-columns: 1fr; }

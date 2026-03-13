@@ -4,17 +4,17 @@ import { getProducts } from '../services/api';
 
 const heroSlides = [
   {
-    title: 'New Season Arrivals',
-    subtitle: 'Discover the latest trends in Indian fashion',
+    title: '🔥 Fashion Sale is Live',
+    subtitle: 'Up to 60% off on ethnic wear, fusion styles & accessories',
     cta: 'Shop Now',
-    bg: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-    accent: '#e94560',
+    bg: 'linear-gradient(135deg, #8B0000 0%, #DC143C 50%, #FF4500 100%)',
+    accent: '#FFD700',
     image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=600&fit=crop',
   },
   {
     title: 'Ethnic Elegance',
     subtitle: 'Handcrafted sarees, lehengas & more for every occasion',
-    cta: 'Explore Collection',
+    cta: 'Shop Women',
     bg: 'linear-gradient(135deg, #2d1b69 0%, #4a1942 50%, #721b65 100%)',
     accent: '#f7c948',
     image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&h=600&fit=crop',
@@ -50,12 +50,52 @@ const categories = [
   },
 ];
 
-const features = [
-  { icon: '🚚', title: 'Free Delivery', desc: 'On orders above ₹999' },
-  { icon: '↩️', title: 'Easy Returns', desc: '7-day return policy' },
-  { icon: '💰', title: 'Cash on Delivery', desc: 'Pay at your doorstep' },
-  { icon: '🔒', title: 'Secure Shopping', desc: '100% safe & trusted' },
+const trustFeatures = [
+  { icon: '🔒', title: 'Secure Payments', desc: '100% safe transactions' },
+  { icon: '✅', title: 'Quality Checked', desc: 'Every product inspected' },
+  { icon: '🔄', title: 'Easy Exchanges', desc: 'Hassle-free process' },
+  { icon: '💬', title: 'WhatsApp Support', desc: 'Chat with us anytime' },
 ];
+
+const megaMenuData = {
+  women: [
+    { heading: 'Ethnic Wear', items: [
+      { label: 'Sarees', sub: 'sarees' },
+      { label: 'Lehengas', sub: 'lehengas' },
+      { label: 'Salwar Suits', sub: 'salwar-suits' },
+      { label: 'Kurtis', sub: 'kurtis' },
+    ]},
+    { heading: 'Essentials', items: [
+      { label: 'Blouses', sub: 'blouses' },
+      { label: 'Dupattas', sub: 'dupattas' },
+      { label: 'Jewellery', sub: 'jewellery' },
+      { label: 'Accessories', sub: 'accessories' },
+    ]},
+  ],
+  men: [
+    { heading: 'Clothing', items: [
+      { label: 'Shirts', sub: 'shirts' },
+      { label: 'Kurtas', sub: 'kurtas' },
+      { label: 'T-Shirts', sub: 't-shirts' },
+      { label: 'Sherwanis', sub: 'sherwanis' },
+      { label: 'Blazers', sub: 'blazers' },
+    ]},
+    { heading: 'Bottoms & More', items: [
+      { label: 'Pants', sub: 'pants' },
+      { label: 'Jeans', sub: 'jeans' },
+      { label: 'Lungis', sub: 'lungis' },
+      { label: 'Footwear', sub: 'footwear' },
+    ]},
+  ],
+  kids: [
+    { heading: 'All Kids', items: [
+      { label: 'Ethnic Wear', sub: 'kids-ethnic' },
+      { label: 'Casual Wear', sub: 'kids-casual' },
+      { label: 'Frocks', sub: 'kids-frocks' },
+      { label: 'Sets', sub: 'kids-sets' },
+    ]},
+  ],
+};
 
 function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate }) {
   const navigate = useNavigate();
@@ -100,12 +140,29 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
           </div>
         </div>
         <div className="nav-center home-nav-links">
-          <button onClick={() => navigate('/shop')}>Shop</button>
-          <button onClick={() => navigate('/shop?category=women')}>Women</button>
-          <button onClick={() => navigate('/shop?category=men')}>Men</button>
-          <button onClick={() => navigate('/shop?category=kids')}>Kids</button>
+          {['women', 'men', 'kids'].map(cat => (
+            <div key={cat} className="nav-dropdown">
+              <button onClick={() => navigate(`/shop?category=${cat}`)}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</button>
+              <div className="mega-menu">
+                {megaMenuData[cat].map((col, i) => (
+                  <div key={i} className="mega-col">
+                    <h5>{col.heading}</h5>
+                    {col.items.map(item => (
+                      <button key={item.sub} onClick={() => navigate(`/shop?category=${cat}&subcategory=${item.sub}`)}>{item.label}</button>
+                    ))}
+                  </div>
+                ))}
+                <div className="mega-col mega-cta">
+                  <button className="mega-shop-all" onClick={() => navigate(`/shop?category=${cat}`)}>Shop All {cat.charAt(0).toUpperCase() + cat.slice(1)} →</button>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button onClick={() => navigate('/shop?maxPrice=999')}>999 Store</button>
+          <button onClick={() => navigate('/shop?sort=price-low')}>Sales & Offers</button>
         </div>
         <div className="nav-right">
+          <button className="nav-brand-link" onClick={() => navigate('/shop')}>Thriya by Sandhya</button>
           <button className="nav-icon-btn" title="Search" onClick={() => navigate('/shop')}>🔍</button>
           <button className="nav-icon-btn" title="Wishlist" onClick={() => onNavigate?.('account-wishlist')}>
             ♡
@@ -135,19 +192,6 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
         </div>
       </section>
 
-      {/* Trust Features */}
-      <section className="features-strip">
-        {features.map((f, i) => (
-          <div key={i} className="feature-item">
-            <span className="feature-icon">{f.icon}</span>
-            <div>
-              <h4>{f.title}</h4>
-              <p>{f.desc}</p>
-            </div>
-          </div>
-        ))}
-      </section>
-
       {/* Shop by Category */}
       <section className="home-section">
         <div className="section-header">
@@ -161,14 +205,14 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
               <div className="category-card-overlay">
                 <h3>{cat.name}</h3>
                 <p>{cat.desc}</p>
-                <span className="category-card-cta">Explore →</span>
+                <span className="category-card-cta">Shop {cat.name} →</span>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* New Arrivals */}
+      {/* Just Dropped */}
       {featured.length > 0 && (
         <section className="home-section">
           <div className="section-header">
@@ -198,14 +242,29 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
         </section>
       )}
 
-      {/* Banner */}
-      <section className="promo-banner">
-        <div className="promo-content">
-          <h2>🎉 Grand Indian Fashion Sale</h2>
-          <p>Up to 60% off on ethnic wear, fusion styles & accessories</p>
-          <button className="promo-cta" onClick={() => navigate('/shop')}>Shop the Sale</button>
-        </div>
-      </section>
+      {/* Pre-Book Exclusive Styles */}
+      {featured.length >= 3 && (
+        <section className="prebook-section">
+          <div className="prebook-content">
+            <h2>✨ Pre-Book Exclusive Styles</h2>
+            <p>Limited pieces, exclusive designs — Pre-book now, dispatch in 5 days</p>
+            <div className="prebook-cards">
+              {featured.slice(0, 3).map(p => (
+                <div key={p._id} className="prebook-card" onClick={() => navigate(`/product/${p._id}`)}>
+                  <div className="prebook-img">
+                    <img src={p.image} alt={p.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} />
+                    <span className="prebook-badge">PRE-BOOK</span>
+                  </div>
+                  <div className="prebook-info">
+                    <p className="prebook-name">{p.name}</p>
+                    <span className="prebook-price">₹{p.price.toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Top Rated */}
       {trending.length > 0 && (
@@ -235,6 +294,40 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
         </section>
       )}
 
+      {/* Seen on Instagram */}
+      {trending.length >= 6 && (
+        <section className="home-section instagram-section">
+          <div className="section-header">
+            <h2>📸 Seen on Instagram</h2>
+            <a className="section-link" href="https://www.instagram.com/thriya_by_sandhya?igsh=MTF1ZmtqeGRoaTBn" target="_blank" rel="noopener noreferrer">Follow @thriya_by_sandhya →</a>
+          </div>
+          <div className="insta-grid">
+            {trending.slice(0, 6).map(p => (
+              <div key={p._id} className="insta-card" onClick={() => navigate(`/product/${p._id}`)}>
+                <img src={p.image} alt={p.name} onError={e => { e.target.onerror = null; e.target.src = fallback; }} />
+                <div className="insta-overlay">
+                  <span>{p.name}</span>
+                  <span className="insta-price">₹{p.price.toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Trust Strip */}
+      <section className="trust-strip">
+        {trustFeatures.map((f, i) => (
+          <div key={i} className="trust-item">
+            <span className="trust-icon">{f.icon}</span>
+            <div>
+              <h4>{f.title}</h4>
+              <p>{f.desc}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+
       {/* Footer */}
       <footer className="home-footer">
         <div className="footer-grid">
@@ -247,16 +340,22 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
           </div>
           <div className="footer-col">
             <h4>Quick Links</h4>
-            <button onClick={() => navigate('/shop')}>Shop All</button>
             <button onClick={() => navigate('/shop?category=women')}>Women</button>
             <button onClick={() => navigate('/shop?category=men')}>Men</button>
             <button onClick={() => navigate('/shop?category=kids')}>Kids</button>
+            <button onClick={() => navigate('/shop?maxPrice=999')}>999 Store</button>
+            <button onClick={() => navigate('/shop?sort=price-low')}>Sales & Offers</button>
+            <button onClick={() => navigate('/about')}>About Us</button>
+            <button onClick={() => navigate('/terms')}>Terms & Conditions</button>
           </div>
           <div className="footer-col">
             <h4>Help</h4>
+            <button onClick={() => navigate('/account?tab=orders')}>Track Your Order</button>
             <button onClick={() => navigate('/account')}>My Account</button>
-            <button onClick={() => navigate('/account')}>My Orders</button>
+            <span>Returns & Exchanges</span>
             <span>Contact: support@thriya.com</span>
+            <span>Payments</span>
+            <a href="https://wa.me/916305563286" target="_blank" rel="noopener noreferrer" className="footer-whatsapp">💬 WhatsApp Support</a>
           </div>
           <div className="footer-col">
             <h4>Follow Us</h4>
@@ -271,6 +370,11 @@ function Home({ user, token, onLogout, wishlistIds, onToggleWishlist, onNavigate
           <p>© 2026 Thriya Stores. Made with ❤️ in India.</p>
         </div>
       </footer>
+
+      {/* Floating WhatsApp */}
+      <a href="https://wa.me/916305563286" target="_blank" rel="noopener noreferrer" className="whatsapp-float" title="Chat on WhatsApp">
+        <svg viewBox="0 0 32 32" width="28" height="28" fill="#fff"><path d="M16.004 0h-.008C7.174 0 0 7.176 0 16.004c0 3.502 1.14 6.744 3.072 9.382L1.062 31.19l5.964-1.97a15.93 15.93 0 008.978 2.784C24.826 32.004 32 24.826 32 16.004 32 7.176 24.826 0 16.004 0zm9.318 22.614c-.396 1.116-1.956 2.042-3.21 2.312-.86.182-1.98.328-5.756-1.238-4.836-2.006-7.946-6.914-8.188-7.232-.232-.318-1.952-2.598-1.952-4.958s1.232-3.516 1.672-3.996c.438-.48.958-.6 1.278-.6.318 0 .636.002.914.016.294.014.688-.112 1.076.822.396.954 1.352 3.294 1.47 3.534.12.238.198.518.04.836-.16.318-.238.518-.478.796-.238.28-.502.624-.716.838-.238.238-.486.496-.21.976.28.48 1.24 2.048 2.662 3.318 1.83 1.634 3.37 2.14 3.85 2.38.478.238.758.198 1.036-.12.28-.318 1.194-1.394 1.514-1.872.318-.48.636-.396 1.076-.238.438.16 2.796 1.318 3.274 1.558.478.238.796.358.914.558.12.198.12 1.156-.278 2.274z"/></svg>
+      </a>
     </div>
   );
 }
