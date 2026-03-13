@@ -5,7 +5,10 @@
 
 const { Resend } = require('resend');
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_GdVNAj1H_MwkGDBAbM2rUMGxFBLwbV7km';
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+if (!RESEND_API_KEY) {
+    console.error('⚠️  RESEND_API_KEY environment variable is not set! Email sending will fail.');
+}
 const FROM_EMAIL = 'Thriya Stores <onboarding@resend.dev>';
 
 const resend = new Resend(RESEND_API_KEY);
