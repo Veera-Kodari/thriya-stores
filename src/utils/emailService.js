@@ -5,16 +5,19 @@
 const nodemailer = require('nodemailer');
 
 if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
-    console.error('WARNING: SMTP_EMAIL or SMTP_PASSWORD not set! Email sending will fail.');
+    console.error('WARNING: SMTP_EMAIL or SMTP_PASSWORD not set in env, using defaults.');
 }
+
+const SMTP_USER = process.env.SMTP_EMAIL || 'kalyankodari6@gmail.com';
+const SMTP_PASS = process.env.SMTP_PASSWORD || 'weqw zueb pnwv bqzr';
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
     auth: {
-        user: process.env.SMTP_EMAIL || '',
-        pass: process.env.SMTP_PASSWORD || '',
+        user: SMTP_USER,
+        pass: SMTP_PASS,
     },
     connectionTimeout: 10000,
     greetingTimeout: 10000,
@@ -108,16 +111,12 @@ const otpEmailTemplate = (otp, purpose, userName) => {
  * @param {string} userName - Optional user name for greeting
  */
 const sendOTPEmail = async (to, otp, purpose = 'registration', userName = '') => {
-    if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
-        throw new Error('Email service not configured (SMTP_EMAIL/SMTP_PASSWORD missing)');
-    }
-
     const subject = purpose === 'registration'
         ? `${otp} is your Thriya Stores verification code`
         : `${otp} is your Thriya Stores password reset code`;
 
     const mailOptions = {
-        from: `"Thriya Stores" <${process.env.SMTP_EMAIL}>`,
+        from: `"Thriya Stores" <${SMTP_USER}>`,
         to,
         subject,
         html: otpEmailTemplate(otp, purpose, userName),
@@ -197,7 +196,7 @@ const orderEmailTemplate = (order, userName) => {
 
 const sendOrderEmail = async (to, order, userName = '') => {
     const mailOptions = {
-        from: `"Thriya Stores" <${process.env.SMTP_EMAIL}>`,
+        from: `"Thriya Stores" <${SMTP_USER}>`,
         to,
         subject: `Order Confirmed! #${order.orderNumber} — Thriya Stores`,
         html: orderEmailTemplate(order, userName),
